@@ -19,6 +19,7 @@
     go
     rustc
     cargo
+    python3
     typescript
     javascript-typescript-langserver
     nodejs

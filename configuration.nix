@@ -8,9 +8,12 @@ let
   me = "a";
   home = "/home/${me}/";
   secrets = import ./secrets.nix;
-  stateVersion = "24.11";
-  home-manager = fetchTarball "https://github.com/nix-community/home-manager/archive/master.tar.gz";
+
+  homeManagerVersion = "24.11"; # TODO: ssot for home-manager.nix
+  
   unstableTarball = fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz";
+  home-manager = fetchTarball "https://github.com/nix-community/home-manager/archive/release-${homeManagerVersion}.tar.gz";
+  nixpkgs = import <nixpkgs> {};
 in
 {
   imports =
@@ -47,18 +50,9 @@ in
     ];
   };
 
-  home-manager.users."${me}"= {
-    /* The home.stateVersion option does not have a default and must be set */
-    home.stateVersion = "${stateVersion}";
-    /* Here goes the rest of your home-manager config, e.g. home.packages = [ pkgs.foo ]; */
-
-    programs = {
-      git = {
-        enable = true;
-        userName  = "avery";
-        userEmail = "avry@pm.me";
-      };
-    };
+  home-manager.users = {
+    "${me}" = import ./home-manager.nix;
+    root = import ./home-manager.nix;
   };
 
   time.timeZone = "America/Los_Angeles";
@@ -89,7 +83,7 @@ in
       VISUAL = "nvim";
       TERM = "alacritty";
       XCURSOR_SIZE = 24;
-      GIT_CONFIG_GLOBAL = "${home}.gitconfig"
+      GIT_CONFIG_GLOBAL = "${home}.gitconfig";
     };
   };
 
@@ -208,18 +202,19 @@ in
         '';
       };
     };
-    phpfpm = {
-      pools.www = {
-        user = "nginx";
-        group = "nginx";
-        settings = {
-          "listen" = "/run/phpfpm/www.sock";
-          "listen.owner" = "nginx";
-          "listen.group" = "nginx";
-          "pm" = "dynamic";
-        };
-      };
-    };
+    # TODO: baikal needs this for db management?
+    #phpfpm = {
+    #  pools.www = {
+    #    user = "nginx";
+    #    group = "nginx";
+    #    settings = {
+    #      "listen" = "/run/phpfpm/www.sock";
+    #      "listen.owner" = "nginx";
+    #      "listen.group" = "nginx";
+    #      "pm" = "dynamic";
+    #    };
+    #  };
+    #};
   };
 
   fileSystems = {
@@ -275,13 +270,6 @@ in
   programs = {
     sway.enable = true;
     nix-ld.enable = true;
-    neovim = {
-      enable = true;
-      defaultEditor = true;
-      viAlias = true;
-      vimAlias = false;
-      #plugins = [];
-    };
     steam = {
       enable = true;
       remotePlay.openFirewall = true;
@@ -309,5 +297,5 @@ in
   # accidentally delete configuration.nix.
   # system.copySystemConfiguration = true;
 
-  system.stateVersion = "${stateVersion}"; # don't you dare
+  system.stateVersion = "24.11"; # don't you dare
 }
