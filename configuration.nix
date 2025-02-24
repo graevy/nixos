@@ -11,7 +11,7 @@ let
 
   homeManagerVersion = "24.11"; # TODO: ssot for home-manager.nix
   
-  unstableTarball = fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz";
+  #unstableTarball = fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz";
   home-manager = fetchTarball "https://github.com/nix-community/home-manager/archive/release-${homeManagerVersion}.tar.gz";
   nixpkgs = import <nixpkgs> {};
 in
@@ -35,13 +35,13 @@ in
   };
 
   nixpkgs = {
-    config = {
-      packageOverrides = pkgs: {
-        unstable = import unstableTarball {
-          config = config.nixpkgs.config;
-        };
-      };
-    };
+    #config = {
+    #  packageOverrides = pkgs: {
+    #    unstable = import unstableTarball {
+    #      config = config.nixpkgs.config;
+    #    };
+    #  };
+    #};
     overlays = [
       # https://github.com/NixOS/nixpkgs/issues/371837
       (final: prev: { 
@@ -50,9 +50,12 @@ in
     ];
   };
 
-  home-manager.users = {
-    "${me}" = import ./home-manager.nix;
-    root = import ./home-manager.nix;
+  home-manager = {
+    backupFileExtension = "backup";
+    users = {
+      "${me}" = import ./home-manager-a.nix;
+      root = import ./home-manager-a.nix;
+    };
   };
 
   time.timeZone = "America/Los_Angeles";
@@ -73,6 +76,9 @@ in
     #firewall.allowedUDPPorts = [ ... ];
     #proxy.default = "http://user:password@proxy:port/";
     #proxy.noProxy = "127.0.0.1,localhost,internal.domain";
+    extraHosts = ''
+    127
+    '';
   };
 
   environment = {
@@ -90,11 +96,17 @@ in
   users.users = {
     ${me} = {
       isNormalUser = true;
-      extraGroups = [ "wheel" "networkmanager" "torrent" ]; 
+      extraGroups = [ "wheel" "networkmanager" "torrent" "docker" ]; 
       packages = with pkgs; [
       ];
     };
-    nginx.extraGroups = [ "acme" ];
+    #nginx.extraGroups = [ "acme" ];
+    radarr = {
+      isSystemUser = true;
+      group = "radarr";
+      home = "/var/lib/radarr";
+      shell = "/run/current-system/sw/bin/nologin";
+    };
     prowlarr = {
       isSystemUser = true;
       group = "prowlarr";
@@ -103,8 +115,31 @@ in
     };
   };
 
+  virtualisation = {
+    docker = {
+      enable = true;
+    };
+    oci-containers = {
+      backend = "docker";
+      containers = {
+        baikal = {
+          image = "ckulka/baikal";
+          autoStart = true;
+          ports = [ "0.0.0.0:8080:80" ];
+          volumes = [
+            "/var/lib/baikal:/var/www/baikal/Specific"
+          ];
+          environment = {
+            BAIKAL_DAV_AUTH_TYPE = "Digest";
+          };
+        };
+      };
+    };
+  };
+
   users.groups = {
     mlocate = {};
+    radarr = {};
     prowlarr = {};
     torrent = {};
   };
@@ -114,8 +149,15 @@ in
     printing.enable = false; # CUPS
     libinput.enable = true; # Touchpad support
     tailscale.enable = true;
-    ollama.enable = true;
+    ollama.enable = false;
     thermald.enable = true; # intel cpu thermal throttling
+    radarr = {
+      enable = true;
+      openFirewall = true; # 7878
+      user = "${me}";
+      group = "radarr";
+      dataDir = "/var/lib/radarr";
+    };
     prowlarr = {
       enable = true;
       package = pkgs.prowlarr;
@@ -124,7 +166,7 @@ in
       enable = true;
       package = pkgs.jackett;
       dataDir = "/var/lib/jackett";
-      port = 9697;
+      port = 9697; # default
     };
     pipewire = {
       enable = true;
@@ -184,37 +226,6 @@ in
         };
       };
     };
-    nginx = {
-      enable = true;
-      virtualHosts."127.0.0.1" = {
-        root = "/var/www/baikal/";
-        listen = [ { addr = "127.0.0.1"; port = 1414; } ];
-        extraConfig = ''
-          index index.php;
-          location ~ \.php$ {
-            include ${pkgs.nginx}/conf/fastcgi_params;
-            fastcgi_pass unix:/run/phpfpm/www.sock;
-            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-          }
-          location / {
-            try_files $uri $uri/ /index.php?$args;
-          }
-        '';
-      };
-    };
-    # TODO: baikal needs this for db management?
-    #phpfpm = {
-    #  pools.www = {
-    #    user = "nginx";
-    #    group = "nginx";
-    #    settings = {
-    #      "listen" = "/run/phpfpm/www.sock";
-    #      "listen.owner" = "nginx";
-    #      "listen.group" = "nginx";
-    #      "pm" = "dynamic";
-    #    };
-    #  };
-    #};
   };
 
   fileSystems = {
@@ -228,27 +239,33 @@ in
   systemd = {
     tmpfiles.rules = [
       "d /mnt 0755 root root"
+      "d /var/lib/radarr/ 0755 radarr radarr"
       "d /var/lib/prowlarr/ 0755 prowlarr prowlarr"
+      "d /var/www/ 0755 root root"
+      "d /var/www/baikal/config 0755 root root"
+      "d /var/www/baikal/Specific 0755 root root"
       "d ${home}torrents 0775 ${me} torrent"
       "d ${home}writes 0700 ${me} users"
       "d ${home}Music 0775 ${me} torrent"
+      "d ${home}calendar 0755 ${me} calendar"
+      "d ${home}.local/linkedobjs 0755 ${me} users"
     ];
     services = {
       # TODO
-      autoSway = {
-        enable = true;
-        description = "Start sway on login";
-        wants = [ "graphical.target" ];
-        after = [ "graphical.target" ];
-        serviceConfig = {
-          Type = "simple";
-          Restart = "always";
-          User = "%u";
-          PAMName = "login";
-          Environment = ''"XDG_RUNTIME_DIR=/run/user/%U"'';
-          ExecStart = ''/bin/sh -c 'sway' '';
-        };
-      };
+      #autoSway = {
+      #  enable = true;
+      #  description = "Start sway on login";
+      #  wants = [ "graphical.target" ];
+      #  after = [ "graphical.target" ];
+      #  serviceConfig = {
+      #    Type = "simple";
+      #    Restart = "always";
+      #    User = "%u";
+      #    PAMName = "login";
+      #    Environment = ''"XDG_RUNTIME_DIR=/run/user/%U"'';
+      #    ExecStart = ''/bin/sh -c 'sway' '';
+      #  };
+      #};
       incrementTTL = {
         enable = true;
         description = "Increment TTL by 1 to avoid tunnel traffic detection";
@@ -256,6 +273,7 @@ in
         after = [ "sysinit.target" ];
         serviceConfig = {
 	  Type = "oneshot";
+	  # oh god oh fuck
           ExecStart = ''/bin/sh -c 'echo $(( $(cat /proc/sys/net/ipv6/conf/default/hop_limit) + 1 )) > /proc/sys/net/ipv6/conf/default/hop_limit && echo $(( $(cat /proc/sys/net/ipv4/ip_default_ttl) + 1 )) > /proc/sys/net/ipv4/ip_default_ttl' '';
         };
       };
@@ -295,7 +313,8 @@ in
   # Copy the NixOS configuration file and link it from the resulting system
   # (/run/current-system/configuration.nix). This is useful in case you
   # accidentally delete configuration.nix.
-  # system.copySystemConfiguration = true;
+  system.copySystemConfiguration = true;
 
+  # don't touch it
   system.stateVersion = "24.11"; # don't you dare
 }

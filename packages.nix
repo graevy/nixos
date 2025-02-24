@@ -12,6 +12,7 @@
     tmux
     i3status-rust
     wl-clipboard
+    killall
 
     man-pages 
     man-pages-posix
@@ -33,8 +34,12 @@
     traceroute
     netcat
     nettools
+    nmap
+    inetutils
+    mosh
     nginx
     wireshark
+    wireguard-tools
 
     ropgadget
     ghidra
@@ -82,6 +87,7 @@
     wineWowPackages.waylandFull
     lutris
     prismlauncher
+    steamcmd
 
     grim
     swappy
@@ -105,6 +111,7 @@
     lidarr
 
     firefox
+    chromium
     tor-browser
     vlc
     libreoffice
@@ -129,7 +136,7 @@
 	}
     )
 
-    unstable.rustmission
+    #unstable.rustmission
   ];
 
   fonts.packages = with pkgs; [
