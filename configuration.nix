@@ -210,7 +210,7 @@ in
       user = "${me}";
       dataDir = "/var/lib/syncthing/";
       configDir = "${home}.config/syncthing";
-      # override WebUI devices/folders
+      # override *WebUI* devices/folders
       overrideDevices = true;
       overrideFolders = true;
       settings = {
@@ -219,13 +219,33 @@ in
         };
         folders = {
           "j0z43-s5odd" = {
-            path = "~/Music";    # Which folder to add to Syncthing
+            path = "~/Music";
             devices = [ "baby" ];
-            ignorePerms = false;  # By default, Syncthing doesn't sync file permissions. This line enables it for this folder.
+            ignorePerms = false;  # By default, Syncthing doesn't sync file permissions
           };
         };
       };
     };
+  };
+
+  system.activationScripts = {
+    symlinkRootBashrc.text = ''
+    if [ ! -L /root/.bashrc ] || [ "$(readlink -f /root/.bashrc)" != "${home}.bashrc" ]; then
+      ln -sf ${home}.bashrc /root/.bashrc
+    fi
+    '';
+    symlinkRootDotssh.text = ''
+    if [ ! -L /root/.ssh ] || [ "$(readlink -f /root/.ssh)" != "${home}.ssh" ]; then
+      ln -sf ${home}.ssh /root/.ssh
+    fi
+    '';
+    # this is only for neovim atm
+    symlinkRootLinkedObjs.text = ''
+    if [ ! -L /root/.local/linkedobjs ] || [ "$(readlink -f /root/.local/linkedobjs)" != "${home}.local/linkedobjs" ]; then
+      mkdir -p /root/.local
+      ln -sf ${home}.local/linkedobjs /root/.local/linkedobjs
+    fi
+    '';
   };
 
   fileSystems = {
@@ -272,8 +292,8 @@ in
         wantedBy = [ "multi-user.target" ];
         after = [ "sysinit.target" ];
         serviceConfig = {
-	  Type = "oneshot";
-	  # oh god oh fuck
+	        Type = "oneshot";
+	        # oh god oh fuck
           ExecStart = ''/bin/sh -c 'echo $(( $(cat /proc/sys/net/ipv6/conf/default/hop_limit) + 1 )) > /proc/sys/net/ipv6/conf/default/hop_limit && echo $(( $(cat /proc/sys/net/ipv4/ip_default_ttl) + 1 )) > /proc/sys/net/ipv4/ip_default_ttl' '';
         };
       };
