@@ -89,7 +89,6 @@ in
       VISUAL = "nvim";
       TERM = "alacritty";
       XCURSOR_SIZE = 24;
-      GIT_CONFIG_GLOBAL = "${home}.gitconfig";
     };
   };
 
@@ -239,11 +238,15 @@ in
       ln -sf ${home}.ssh /root/.ssh
     fi
     '';
-    # this is only for neovim atm
-    symlinkRootLinkedObjs.text = ''
-    if [ ! -L /root/.local/linkedobjs ] || [ "$(readlink -f /root/.local/linkedobjs)" != "${home}.local/linkedobjs" ]; then
-      mkdir -p /root/.local
-      ln -sf ${home}.local/linkedobjs /root/.local/linkedobjs
+    symlinkRootGitconfig.text = ''
+    if [ ! -L /root/.gitconfig ] || [ "$(readlink -f /root/.gitconfig)":wq != "${home}.gitconfig" ]; then
+      ln -sf ${home}.gitconfig /root/.gitconfig
+    fi
+    '';
+    symlinkRootNvim.text = ''
+    if [ ! -L /root/.local/share/nvim ] || [ "$(readlink -f /root/.local/share/nvim)" != "${home}.local/share/nvim" ]; then
+      mkdir -p /root/.local/share
+      ln -sf ${home}.local/share/nvim /root/.local/share/nvim
     fi
     '';
   };
@@ -268,7 +271,6 @@ in
       "d ${home}writes 0700 ${me} users"
       "d ${home}Music 0775 ${me} torrent"
       "d ${home}calendar 0755 ${me} calendar"
-      "d ${home}.local/linkedobjs 0755 ${me} users"
     ];
     services = {
       # TODO

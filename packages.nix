@@ -87,7 +87,6 @@
     wineWowPackages.waylandFull
     lutris
     prismlauncher
-    steamcmd
 
     grim
     swappy
@@ -105,6 +104,7 @@
     zlib
     p7zip
     ripgrep
+    fd
 
     prowlarr
     jackett
@@ -132,14 +132,19 @@
 	  vadimcn.vscode-lldb
 	  ms-vscode-remote.remote-ssh
 	  continue.continue
-	  ];
-	}
-    )
+	    ];
+	  })
+
+    lua-language-server
+    rust-analyzer
 
     #unstable.rustmission
   ];
 
   fonts.packages = with pkgs; [
+
+    (nerdfonts.override { fonts = [ "DejaVuSansMono" ]; })
+
     (pkgs.stdenv.mkDerivation {
       name = "statusbar-font";
       src = pkgs.fetchFromGitHub {
@@ -153,5 +158,6 @@
         cp $src/JetBrainsMonoRegularBar.ttf $out/share/fonts/truetype/
       '';
     })
+
   ];
 }

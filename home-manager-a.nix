@@ -15,7 +15,7 @@
     };
   };
   xdg.configFile."nvim" = {
-    source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.local/linkedobjs/nvim/";
+    source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.local/share/nvim/";
   };
   xdg.mimeApps = {
     enable = true;
