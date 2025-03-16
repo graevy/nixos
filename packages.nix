@@ -105,41 +105,62 @@
     p7zip
     ripgrep
     fd
+    fzf
+
+    feh
+    imagemagick
+    lyx
+    tectonic # latex rendering
+    mermaid-cli # mermaid diagrams
 
     prowlarr
     jackett
     lidarr
 
     firefox
-    chromium
     tor-browser
     vlc
     libreoffice
     gimp
-    feh
-    imagemagick
-    lyx
     discord
     element-desktop
     telegram-desktop
     signal-desktop
     anki
+    # this is the result of at least 5 hours of nixos-rebuild internals hell.
+    # codelldb is a vscode extension. its binary is at /nix/store/<hash>-<name>/shared/.../codelldb,
+    # and not /nix/store/<hash>-<name>/bin/codelldb.
+    # this means the binary is not automatically linked in /run/current-system/sw/bin by nixos-rebuild,
+    # and is therefore not PATH-accessible. so of all the solutions i tried,
+    # this is the only one that declaratively met the criteria of:
+    # idempotently appending to PATH, presenting a binary (not a wrapper), readable, and near the package definition
+    vscode-extensions.vadimcn.vscode-lldb.adapter
+    # i also went for this to manually extract the adapter
+    #(pkgs.runCommand "symlink-codelldb" { } ''
+    #  mkdir -p $out/bin
+    #  ln -s ${pkgs.vscode-extensions.vadimcn.vscode-lldb}/share/vscode/extensions/vadimcn.vscode-lldb/adapter/codelldb $out/bin/codelldb
+    #'')
     (vscode-with-extensions.override {
-      vscodeExtensions = with
-        vscode-extensions; [
-	  ms-python.python
-	  rust-lang.rust-analyzer
-	  vadimcn.vscode-lldb
-	  ms-vscode-remote.remote-ssh
-	  continue.continue
+      vscodeExtensions = with vscode-extensions; [
+	      ms-python.python
+	      rust-lang.rust-analyzer
+        # idk if defining this outside of this block matters yet
+	      #vadimcn.vscode-lldb
+	      ms-vscode-remote.remote-ssh
+	      continue.continue
 	    ];
 	  })
 
     lua-language-server
     rust-analyzer
-
-    #unstable.rustmission
   ];
+
+  # nix documentation is so bad
+  # fill this with strings
+  # for each package in systemPackages, if it has a subdir matching one of the strings,
+  # add it to the derivation for that string that is about to be created.
+  #environment.pathsToLink = [
+  #];
 
   fonts.packages = with pkgs; [
 

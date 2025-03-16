@@ -82,8 +82,6 @@ in
   };
 
   environment = {
-    etc = {
-    };
     variables = {
       EDITOR = "nvim";
       VISUAL = "nvim";
@@ -233,11 +231,12 @@ in
       ln -sf ${home}.bashrc /root/.bashrc
     fi
     '';
-    symlinkRootDotssh.text = ''
-    if [ ! -L /root/.ssh ] || [ "$(readlink -f /root/.ssh)" != "${home}.ssh" ]; then
-      ln -sf ${home}.ssh /root/.ssh
-    fi
-    '';
+    # removing this because openssh panics when a different user (including root) uses someone's ssh config
+    #symlinkRootDotssh.text = ''
+    #if [ ! -L /root/.ssh ] || [ "$(readlink -f /root/.ssh)" != "${home}.ssh" ]; then
+    #  ln -sf ${home}.ssh /root/.ssh
+    #fi
+    #'';
     symlinkRootGitconfig.text = ''
     if [ ! -L /root/.gitconfig ] || [ "$(readlink -f /root/.gitconfig)":wq != "${home}.gitconfig" ]; then
       ln -sf ${home}.gitconfig /root/.gitconfig
@@ -263,14 +262,14 @@ in
     tmpfiles.rules = [
       "d /mnt 0755 root root"
       "d /var/lib/radarr/ 0755 radarr radarr"
-      "d /var/lib/prowlarr/ 0755 prowlarr prowlarr"
+      #"d /var/lib/prowlarr/ 0755 prowlarr prowlarr"
       "d /var/www/ 0755 root root"
       "d /var/www/baikal/config 0755 root root"
       "d /var/www/baikal/Specific 0755 root root"
       "d ${home}torrents 0775 ${me} torrent"
       "d ${home}writes 0700 ${me} users"
       "d ${home}Music 0775 ${me} torrent"
-      "d ${home}calendar 0755 ${me} calendar"
+      #"d ${home}calendar 0755 ${me} calendar"
     ];
     services = {
       # TODO
