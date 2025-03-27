@@ -7,12 +7,16 @@
 
   environment.systemPackages = with pkgs; [
     vim
+    helix
     alacritty
     dmenu-rs
     tmux
     i3status-rust
     wl-clipboard
     killall
+    kdePackages.kdialog
+    kdePackages.xdg-desktop-portal-kde
+    kdePackages.dolphin
 
     man-pages 
     man-pages-posix
@@ -22,7 +26,6 @@
     cargo
     python3
     typescript
-    javascript-typescript-langserver
     nodejs
     gcc
     gdb
@@ -30,6 +33,7 @@
     wget
     curl
     whois
+    rdap
     dig
     traceroute
     netcat
@@ -41,17 +45,15 @@
     wireshark
     wireguard-tools
 
-    ropgadget
-    ghidra
     hugo
     tor
 
     k9s
     kubectl
 
-    valgrind
     git
     git-lfs
+    lazygit
     nix-tree
     nix-search-cli
     mlocate
@@ -109,6 +111,7 @@
 
     feh
     imagemagick
+    viu
     lyx
     tectonic # latex rendering
     mermaid-cli # mermaid diagrams
@@ -127,6 +130,7 @@
     telegram-desktop
     signal-desktop
     anki
+
     # this is the result of at least 5 hours of nixos-rebuild internals hell.
     # codelldb is a vscode extension. its binary is at /nix/store/<hash>-<name>/shared/.../codelldb,
     # and not /nix/store/<hash>-<name>/bin/codelldb.
@@ -153,6 +157,7 @@
 
     lua-language-server
     rust-analyzer
+    javascript-typescript-langserver
   ];
 
   # nix documentation is so bad
@@ -172,7 +177,7 @@
           owner = "graevy";
           repo = "newfont";
           rev = "main";
-          sha256 = "1nfxzy90gbnwlv840n3zyb41xxm61q87j4rp7pm135ccynv09wks";
+          sha256 = "14194f7fxmkdqfcbx9qr2mnfkgp4s84jlzissmb5h12viv2ca8cq";
       };
       installPhase = ''
         mkdir -p $out/share/fonts/truetype

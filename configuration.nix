@@ -87,6 +87,8 @@ in
       VISUAL = "nvim";
       TERM = "alacritty";
       XCURSOR_SIZE = 24;
+      XDG_CURRENT_DESKTOP = "KDE";
+      GTK_USE_PORTAL = "1";
     };
   };
 
@@ -97,7 +99,6 @@ in
       packages = with pkgs; [
       ];
     };
-    #nginx.extraGroups = [ "acme" ];
     radarr = {
       isSystemUser = true;
       group = "radarr";
@@ -143,7 +144,7 @@ in
 
   services = {
     openssh.enable = true;
-    printing.enable = false; # CUPS
+    printing.enable = true; # CUPS
     libinput.enable = true; # Touchpad support
     tailscale.enable = true;
     ollama.enable = false;
@@ -224,6 +225,11 @@ in
       };
     };
   };
+  systemd.services = {
+  # TODO: need to bind jackett and *rr services to each other so they aren't always running on boot
+      # partOf = [ "prowlarr.service" ];
+      # wantedBy = [ ];
+  };
 
   system.activationScripts = {
     symlinkRootBashrc.text = ''
@@ -270,6 +276,7 @@ in
       "d ${home}writes 0700 ${me} users"
       "d ${home}Music 0775 ${me} torrent"
       #"d ${home}calendar 0755 ${me} calendar"
+      "d ${home}code 0755 ${me} users"
     ];
     services = {
       # TODO
@@ -300,11 +307,28 @@ in
       };
     };
     user.services = {
-      
     };
   };
 
-  xdg.portal.wlr.enable = true;
+  xdg = {
+    portal = {
+      enable = true;
+      #wlr.enable = true;
+      extraPortals = [ pkgs.kdePackages.xdg-desktop-portal-kde pkgs.xdg-desktop-portal-kde ];
+    };
+    mime.defaultApplications = {
+      "text/html" = "firefox.desktop";
+      "x-scheme-handler/file" = "org.kde.dolphin.desktop";
+      # "image/jpeg";
+      # "image/png";
+      # "x-scheme-handler/mailto";
+
+      #"video"
+      #"audio"
+      #"text/calendar"
+      #"" = "org.freedesktop.impl.portal.desktop.kde.desktop";
+    };
+  };
 
   programs = {
     sway.enable = true;
