@@ -11,7 +11,7 @@ let
 
   homeManagerVersion = "24.11"; # TODO: ssot for home-manager.nix
   
-  #unstableTarball = fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz";
+  # unstableTarball = fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz";
   home-manager = fetchTarball "https://github.com/nix-community/home-manager/archive/release-${homeManagerVersion}.tar.gz";
   nixpkgs = import <nixpkgs> {};
 in
@@ -35,13 +35,14 @@ in
   };
 
   nixpkgs = {
-    #config = {
+    # if i ever bother to switch to unstables
+    # config = {
     #  packageOverrides = pkgs: {
     #    unstable = import unstableTarball {
     #      config = config.nixpkgs.config;
     #    };
     #  };
-    #};
+    # };
     overlays = [
       # https://github.com/NixOS/nixpkgs/issues/371837
       (final: prev: { 
@@ -87,7 +88,6 @@ in
       VISUAL = "nvim";
       TERM = "alacritty";
       XCURSOR_SIZE = 24;
-      XDG_CURRENT_DESKTOP = "KDE";
       GTK_USE_PORTAL = "1";
     };
   };
@@ -198,7 +198,7 @@ in
         CPU_MIN_PERF_ON_BAT = 0;
         CPU_MAX_PERF_ON_BAT = 100;
 
-       START_CHARGE_THRESH_BAT0 = 70; # starts-to-charge threshold
+       START_CHARGE_THRESH_BAT0 = 79; # starts-to-charge threshold
        STOP_CHARGE_THRESH_BAT0 = 80; # stops-charging threshold
       };
     };
@@ -219,7 +219,7 @@ in
           "j0z43-s5odd" = {
             path = "~/Music";
             devices = [ "baby" ];
-            ignorePerms = false;  # By default, Syncthing doesn't sync file permissions
+            ignorePerms = false;  # doesn't sync file perms by default
           };
         };
       };
@@ -237,12 +237,6 @@ in
       ln -sf ${home}.bashrc /root/.bashrc
     fi
     '';
-    # removing this because openssh panics when a different user (including root) uses someone's ssh config
-    #symlinkRootDotssh.text = ''
-    #if [ ! -L /root/.ssh ] || [ "$(readlink -f /root/.ssh)" != "${home}.ssh" ]; then
-    #  ln -sf ${home}.ssh /root/.ssh
-    #fi
-    #'';
     symlinkRootGitconfig.text = ''
     if [ ! -L /root/.gitconfig ] || [ "$(readlink -f /root/.gitconfig)":wq != "${home}.gitconfig" ]; then
       ln -sf ${home}.gitconfig /root/.gitconfig
@@ -312,21 +306,17 @@ in
 
   xdg = {
     portal = {
-      enable = true;
-      #wlr.enable = true;
-      extraPortals = [ pkgs.kdePackages.xdg-desktop-portal-kde pkgs.xdg-desktop-portal-kde ];
-    };
-    mime.defaultApplications = {
-      "text/html" = "firefox.desktop";
-      "x-scheme-handler/file" = "org.kde.dolphin.desktop";
-      # "image/jpeg";
-      # "image/png";
-      # "x-scheme-handler/mailto";
-
-      #"video"
-      #"audio"
-      #"text/calendar"
-      #"" = "org.freedesktop.impl.portal.desktop.kde.desktop";
+      wlr = {
+        enable = true;
+        settings = {
+          screencast = {
+            output_name = "eDP-1";
+            max_fps = 30;
+            chooser_type = "simple";
+            chooser_cmd = "${pkgs.slurp}/bin/slurp -f %o -or";
+          };
+        };
+      };
     };
   };
 

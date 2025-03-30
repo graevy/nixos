@@ -17,6 +17,8 @@
     kdePackages.kdialog
     kdePackages.xdg-desktop-portal-kde
     kdePackages.dolphin
+    yazi
+    # xdg-desktop-portal-termfilechooser
 
     man-pages 
     man-pages-posix
@@ -27,7 +29,6 @@
     python3
     typescript
     nodejs
-    gcc
     gdb
 
     wget
@@ -131,6 +132,26 @@
     signal-desktop
     anki
 
+    (pkgs.writeTextFile {
+      name = "yazi-choose.desktop";
+      text =
+        ''
+        [Desktop Entry]
+        Name=Yazi Chooser
+        Icon=yazi
+        Comment=launch yazi as a file chooser
+        Terminal=true
+        TryExec=yazi
+        Exec=yazi %u --chooser-file -
+        X-Desktop-Portal-Interfaces=org.freedesktop.impl.portal.FileChooser
+        Type=Application
+        MimeType=inode/directory;x-scheme-handler/file;
+        Categories=Utility;Core;System;FileTools;FileManager;ConsoleOnly
+        Keywords=File;Manager;Explorer;Browser;Launcher
+        '';
+      destination = "/share/applications/yazi-pick.desktop";
+    })
+
     # this is the result of at least 5 hours of nixos-rebuild internals hell.
     # codelldb is a vscode extension. its binary is at /nix/store/<hash>-<name>/shared/.../codelldb,
     # and not /nix/store/<hash>-<name>/bin/codelldb.
@@ -144,6 +165,7 @@
     #  mkdir -p $out/bin
     #  ln -s ${pkgs.vscode-extensions.vadimcn.vscode-lldb}/share/vscode/extensions/vadimcn.vscode-lldb/adapter/codelldb $out/bin/codelldb
     #'')
+
     (vscode-with-extensions.override {
       vscodeExtensions = with vscode-extensions; [
 	      ms-python.python
@@ -155,6 +177,8 @@
 	    ];
 	  })
 
+    clang
+    clang-tools
     lua-language-server
     rust-analyzer
     javascript-typescript-langserver
