@@ -85,11 +85,7 @@
     btop
     powertop
     dust
-
-    winetricks
-    wineWowPackages.waylandFull
-    lutris
-    prismlauncher
+    diskonaut
 
     grim
     swappy
@@ -182,6 +178,13 @@
     lua-language-server
     rust-analyzer
     javascript-typescript-langserver
+
+    # games
+    winetricks
+    wineWowPackages.waylandFull
+    lutris
+    prismlauncher
+    cockatrice
   ];
 
   # nix documentation is so bad

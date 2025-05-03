@@ -77,9 +77,9 @@ in
     #firewall.allowedUDPPorts = [ ... ];
     #proxy.default = "http://user:password@proxy:port/";
     #proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-    extraHosts = ''
-    127
-    '';
+    # extraHosts = ''
+    # 127
+    # '';
   };
 
   environment = {
@@ -99,12 +99,12 @@ in
       packages = with pkgs; [
       ];
     };
-    radarr = {
-      isSystemUser = true;
-      group = "radarr";
-      home = "/var/lib/radarr";
-      shell = "/run/current-system/sw/bin/nologin";
-    };
+    # radarr = {
+    #   isSystemUser = true;
+    #   group = "radarr";
+    #   home = "/var/lib/radarr";
+    #   shell = "/run/current-system/sw/bin/nologin";
+    # };
     prowlarr = {
       isSystemUser = true;
       group = "prowlarr";
@@ -114,57 +114,57 @@ in
   };
 
   virtualisation = {
-    docker = {
-      enable = true;
-    };
-    oci-containers = {
-      backend = "docker";
-      containers = {
-        baikal = {
-          image = "ckulka/baikal";
-          autoStart = true;
-          ports = [ "0.0.0.0:8080:80" ];
-          volumes = [
-            "/var/lib/baikal:/var/www/baikal/Specific"
-          ];
-          environment = {
-            BAIKAL_DAV_AUTH_TYPE = "Digest";
-          };
-        };
-      };
-    };
+    # TODO
+    # docker = {
+    #   enable = true;
+    # };
+    # oci-containers = {
+    #   backend = "docker";
+    #   containers = {
+    #     baikal = {
+    #       image = "ckulka/baikal";
+    #       autoStart = false;
+    #       ports = [ "0.0.0.0:8080:80" ];
+    #       volumes = [
+    #         "/var/lib/baikal:/var/www/baikal/Specific"
+    #       ];
+    #       environment = {
+    #         BAIKAL_DAV_AUTH_TYPE = "Digest";
+    #       };
+    #     };
+    #   };
+    # };
   };
 
   users.groups = {
     mlocate = {};
-    radarr = {};
+    # radarr = {};
     prowlarr = {};
     torrent = {};
+    headscale = {};
   };
 
   services = {
     openssh.enable = true;
     printing.enable = true; # CUPS
-    libinput.enable = true; # Touchpad support
-    tailscale.enable = true;
+    tailscale.enable = true; # TODO
     ollama.enable = false;
     thermald.enable = true; # intel cpu thermal throttling
-    radarr = {
+    # Touchpad support
+    libinput.enable = true;
+    headscale = {
       enable = true;
-      openFirewall = true; # 7878
       user = "${me}";
-      group = "radarr";
-      dataDir = "/var/lib/radarr";
-    };
-    prowlarr = {
-      enable = true;
-      package = pkgs.prowlarr;
-    };
-    jackett = {
-      enable = true;
-      package = pkgs.jackett;
-      dataDir = "/var/lib/jackett";
-      port = 9697; # default
+      group = "headscale";
+      address = secrets.headscale_address;
+      port = secrets.headscale_port;
+      settings = {
+        dns = {
+          magic_dns = true;
+          base_domain = secrets.headscale_base_domain;
+          search_domains = secrets.headscale_search_domains;
+        };
+      };
     };
     pipewire = {
       enable = true;
@@ -173,15 +173,33 @@ in
       pulse.enable = true;
       jack.enable = false;
     };
+    # torrenting services
+    # radarr = {
+    #   enable = true;
+    #   openFirewall = true; # 7878
+    #   user = "radarr";
+    #   group = "radarr";
+    #   dataDir = "/var/lib/radarr";
+    # };
+    prowlarr = {
+      enable = true;
+      package = pkgs.prowlarr;
+    };
+    jackett = {
+      enable = true;
+      package = pkgs.jackett;
+      dataDir = "/var/lib/jackett";
+      port = secrets.jackett_port;
+    };
     transmission = {
       enable = true;
       openRPCPort = true;
       user = "${me}";
       settings = {
         download-dir = "${home}torrents";
-        rpc-bind-address = "127.0.0.1";
-	rpc-whitelist = "127.0.0.1";
-	rpc-whitelist-enabled = false;
+        rpc-bind-address = secrets.transmission_rpc_bind_address;
+	      rpc-whitelist = secrets.transmission_rpc_whitelist;
+	      rpc-whitelist-enabled = false;
       };
     };
     tlp = {
@@ -198,8 +216,8 @@ in
         CPU_MIN_PERF_ON_BAT = 0;
         CPU_MAX_PERF_ON_BAT = 100;
 
-       START_CHARGE_THRESH_BAT0 = 79; # starts-to-charge threshold
-       STOP_CHARGE_THRESH_BAT0 = 80; # stops-charging threshold
+       START_CHARGE_THRESH_BAT0 = 84; # starts-to-charge threshold
+       STOP_CHARGE_THRESH_BAT0 = 85; # stops-charging threshold
       };
     };
     syncthing = {
@@ -225,23 +243,59 @@ in
       };
     };
   };
-  systemd.services = {
-  # TODO: need to bind jackett and *rr services to each other so they aren't always running on boot
-      # partOf = [ "prowlarr.service" ];
-      # wantedBy = [ ];
+  systemd = {
+    services = {
+      # this is the simplest nixos pattern i have found to prevent something from starting at boot
+      # disabling the service declaration above means the unit file doesn't get created, so overwrite wantedBy
+      printing.wantedBy = lib.mkForce [ ];
+      tailscale.wantedBy = lib.mkForce [ ];
+      headscale.wantedBy = lib.mkForce [ ];
+      syncthing.wantedBy = lib.mkForce [ ];
+      # these torrent services are all bound to torrent.target, meaning they stop when torrent.target stops
+      # they're all wantedBy torrent.target, meaning they start when torrent.target starts
+      # this permits manually toggling torrent services by systemctl [start|stop] torrent.target
+      # radarr = {
+      #   bindsTo = lib.mkForce [ "torrent.target" ];
+      #   wantedBy = lib.mkForce [ "torrent.target" ];
+      # };
+      prowlarr = {
+        bindsTo = lib.mkForce [ "torrent.target" ];
+        wantedBy = lib.mkForce [ "torrent.target" ];
+      };
+      jackett = {
+        bindsTo = lib.mkForce [ "torrent.target" ];
+        wantedBy = lib.mkForce [ "torrent.target" ];
+      };
+      transmission = {
+        bindsTo = lib.mkForce [ "torrent.target" ];
+        wantedBy = lib.mkForce [ "torrent.target" ];
+      };
+
+    };
+    targets.torrent = {
+      description = "start/stop torrents";
+      wantedBy = [ ];
+    };
   };
 
   system.activationScripts = {
+    # i want root to inherit my bashrc, gitconfig, nvim config, ssh config, all that
+    # however. simply symlinking e.g. /root/.bashrc to ${home}.bashrc is a massive priv-esc risk
+    # my solution is to have both me and root symlink to a third .config/shared/bashrc, drw-r--r-- root root
+    # i think most people would put this in /etc, but .config is included in my home dir monorepo
+    # this works well except for ssh, because openssh is stingy about its perms
+    # but honestly, i just give root its own public keys, i think that's fine
     symlinkRootBashrc.text = ''
-    if [ ! -L /root/.bashrc ] || [ "$(readlink -f /root/.bashrc)" != "${home}.bashrc" ]; then
-      ln -sf ${home}.bashrc /root/.bashrc
+    if [ ! -L /root/.bashrc ] || [ "$(readlink -f /root/.bashrc)" != "${home}.config/shared/bashrc" ]; then
+      ln -sf ${home}.config/shared/bashrc /root/.bashrc
     fi
     '';
     symlinkRootGitconfig.text = ''
     if [ ! -L /root/.gitconfig ] || [ "$(readlink -f /root/.gitconfig)":wq != "${home}.gitconfig" ]; then
-      ln -sf ${home}.gitconfig /root/.gitconfig
+      ln -sf ${home}.config/shared/gitconfig /root/.gitconfig
     fi
     '';
+    # TODO i think this opens my user to run arbitrary lua as root?
     symlinkRootNvim.text = ''
     if [ ! -L /root/.local/share/nvim ] || [ "$(readlink -f /root/.local/share/nvim)" != "${home}.local/share/nvim" ]; then
       mkdir -p /root/.local/share
@@ -250,19 +304,19 @@ in
     '';
   };
 
-  fileSystems = {
-    "/var/lib/prowlarr" = {
-      device = "{pkgs.prowlarr}";
-      options = [ "bind" "rw" ];
-      fsType = "none";
-    };
-  };
+  # fileSystems = {
+  #   "/var/lib/prowlarr" = {
+  #     device = "{pkgs.prowlarr}";
+  #     options = [ "bind" "rw" ];
+  #     fsType = "none";
+  #   };
+  # };
 
   systemd = {
     tmpfiles.rules = [
       "d /mnt 0755 root root"
-      "d /var/lib/radarr/ 0755 radarr radarr"
-      #"d /var/lib/prowlarr/ 0755 prowlarr prowlarr"
+      # "d /var/lib/radarr/ 0755 radarr radarr"
+      "d /var/lib/prowlarr/ 0755 prowlarr prowlarr"
       "d /var/www/ 0755 root root"
       "d /var/www/baikal/config 0755 root root"
       "d /var/www/baikal/Specific 0755 root root"
