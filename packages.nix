@@ -40,6 +40,7 @@
     netcat
     nettools
     nmap
+    openssl
     inetutils
     mosh
     nginx
@@ -57,6 +58,7 @@
     lazygit
     nix-tree
     nix-search-cli
+    nix-inspect
     mlocate
 
     mariadb
@@ -85,7 +87,6 @@
     btop
     powertop
     dust
-    diskonaut
 
     grim
     swappy
@@ -116,8 +117,10 @@
     prowlarr
     jackett
     lidarr
+    yt-dlp
 
     firefox
+    torsocks
     tor-browser
     vlc
     libreoffice
@@ -196,7 +199,7 @@
 
   fonts.packages = with pkgs; [
 
-    (nerdfonts.override { fonts = [ "DejaVuSansMono" ]; })
+    nerd-fonts.dejavu-sans-mono
 
     (pkgs.stdenv.mkDerivation {
       name = "statusbar-font";

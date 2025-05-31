@@ -1,23 +1,19 @@
-# Edit this configuration file to define what should be installed on
-# your system. Help is available in the configuration.nix(5) man page, on
-# https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
-
 { config, lib, pkgs, ... }:
 
 let
   me = "a";
   home = "/home/${me}/";
+  vars = import ./vars.nix;
   secrets = import ./secrets.nix;
 
-  homeManagerVersion = "24.11"; # TODO: ssot for home-manager.nix
-  
   # unstableTarball = fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz";
-  home-manager = fetchTarball "https://github.com/nix-community/home-manager/archive/release-${homeManagerVersion}.tar.gz";
+  home-manager = fetchTarball
+    "https://github.com/nix-community/home-manager/archive/release-${vars.homeManagerVersion}.tar.gz";
   nixpkgs = import <nixpkgs> {};
 in
 {
   imports =
-    [ 
+    [
       ./hardware-configuration.nix
       ./packages.nix
       (import "${home-manager}/nixos")
@@ -71,6 +67,7 @@ in
 
   networking = {
     hostName = "very";
+    # domain = "lol.local";
     networkmanager.enable = true;
     firewall.enable = false;
     #firewall.allowedTCPPorts = [ ... ];
@@ -95,7 +92,7 @@ in
   users.users = {
     ${me} = {
       isNormalUser = true;
-      extraGroups = [ "wheel" "networkmanager" "torrent" "docker" ]; 
+      extraGroups = [ "wheel" "networkmanager" "torrent" "docker" "libvirtd" ]; 
       packages = with pkgs; [
       ];
     };
@@ -113,7 +110,9 @@ in
     };
   };
 
-  virtualisation = {
+  # virtualisation = {
+  #   libvirtd.enable = true;
+  #   spiceUSBRedirection.enable = true;
     # TODO
     # docker = {
     #   enable = true;
@@ -134,7 +133,7 @@ in
     #     };
     #   };
     # };
-  };
+  # };
 
   users.groups = {
     mlocate = {};
@@ -142,16 +141,34 @@ in
     prowlarr = {};
     torrent = {};
     headscale = {};
+    libvirtd = {};
+  };
+
+  programs = {
+    sway.enable = true;
+    nix-ld.enable = false; # maybe
+    virt-manager.enable = true;
+    steam = {
+      enable = true;
+      remotePlay.openFirewall = true;
+      dedicatedServer.openFirewall = true;
+      localNetworkGameTransfers.openFirewall = true;
+      gamescopeSession.enable = true;
+      package = pkgs.steam.override {};
+    };
   };
 
   services = {
+    # many of these are disabled in systemd.services.<service>.wantedBy below
     openssh.enable = true;
     printing.enable = true; # CUPS
-    tailscale.enable = true; # TODO
     ollama.enable = false;
     thermald.enable = true; # intel cpu thermal throttling
-    # Touchpad support
-    libinput.enable = true;
+    libinput.enable = true; # touchpad support
+    tor = {
+      enable = true;
+      client.enable = true; # faster client port, default 9063
+    };
     headscale = {
       enable = true;
       user = "${me}";
@@ -232,12 +249,18 @@ in
       settings = {
         devices = {
           "baby" = { id = secrets.baby_syncthing_id; };
+          "kob" = { id = secrets.kob_syncthing_id; };
         };
         folders = {
-          "j0z43-s5odd" = {
+          "${secrets.baby_syncthing_music_folder_id}" = {
             path = "~/Music";
             devices = [ "baby" ];
-            ignorePerms = false;  # doesn't sync file perms by default
+            ignorePerms = false;  # "don't sync file perms by default"
+          };
+          "${secrets.baby_syncthing_books_folder_id}" = {
+            path = "~/Documents/books";
+            devices = [ "baby" "kob" ];
+            ignorePerms = false;
           };
         };
       };
@@ -245,15 +268,30 @@ in
   };
   systemd = {
     services = {
-      # this is the simplest nixos pattern i have found to prevent something from starting at boot
-      # disabling the service declaration above means the unit file doesn't get created, so overwrite wantedBy
+      # this is the simplest nixos pattern i have found to (manually) lazy-load services.
+      # `services.printing.enabled = false` means the unit file doesn't get created; can't `systemctl start cups`
+      # note that the initial declaration is in services, not systemd.services;
+      # declaring custom services here would also work, but is less stable
       printing.wantedBy = lib.mkForce [ ];
-      tailscale.wantedBy = lib.mkForce [ ];
       headscale.wantedBy = lib.mkForce [ ];
       syncthing.wantedBy = lib.mkForce [ ];
+      tor.wantedBy = lib.mkForce [ ];
+      incrementTTL = {
+        enable = true;
+        description = "Increment TTL by 1 to avoid simple tunnel traffic detection";
+        wantedBy = [ "multi-user.target" ];
+        after = [ "sysinit.target" ];
+        serviceConfig = {
+	        Type = "oneshot";
+	        # oh god oh fuck
+          ExecStart = ''/bin/sh -c 'echo $(( $(cat /proc/sys/net/ipv6/conf/default/hop_limit) + 1 )) > /proc/sys/net/ipv6/conf/default/hop_limit && echo $(( $(cat /proc/sys/net/ipv4/ip_default_ttl) + 1 )) > /proc/sys/net/ipv4/ip_default_ttl' '';
+        };
+      };
+
+      # in addition to lazy-loading services, bind them together as targets
       # these torrent services are all bound to torrent.target, meaning they stop when torrent.target stops
-      # they're all wantedBy torrent.target, meaning they start when torrent.target starts
-      # this permits manually toggling torrent services by systemctl [start|stop] torrent.target
+      # they're all wantedBy torrent.target, meaning they start when torrent.target starts.
+      # systemctl [start|stop] torrent.target toggles them all
       # radarr = {
       #   bindsTo = lib.mkForce [ "torrent.target" ];
       #   wantedBy = lib.mkForce [ "torrent.target" ];
@@ -276,12 +314,25 @@ in
       description = "start/stop torrents";
       wantedBy = [ ];
     };
+    tmpfiles.rules = [
+      "d /mnt 0755 root root"
+      # "d /var/lib/radarr/ 0755 radarr radarr"
+      "d /var/lib/prowlarr/ 0755 prowlarr prowlarr"
+      "d /var/www/ 0755 root root"
+      "d ${home}torrents 0775 ${me} torrent"
+      "d ${home}writes 0700 ${me} users"
+      "d ${home}Music 0775 ${me} torrent"
+      #"d ${home}calendar 0755 ${me} calendar"
+      "d /var/www/baikal/config 0755 root root"
+      "d /var/www/baikal/Specific 0755 root root"
+      "d ${home}code 0755 ${me} users"
+    ];
   };
 
   system.activationScripts = {
-    # i want root to inherit my bashrc, gitconfig, nvim config, ssh config, all that
-    # however. simply symlinking e.g. /root/.bashrc to ${home}.bashrc is a massive priv-esc risk
-    # my solution is to have both me and root symlink to a third .config/shared/bashrc, drw-r--r-- root root
+    # i want root to inherit my shell, git, nvim, ssh configs...however.
+    # symlinking /root/<config> to /home/me/<config> is a priv-esc risk
+    # my solution is to have both me and root symlink to a third e.g. .config/shared/bashrc, drw-r--r-- root root
     # i think most people would put this in /etc, but .config is included in my home dir monorepo
     # this works well except for ssh, because openssh is stingy about its perms
     # but honestly, i just give root its own public keys, i think that's fine
@@ -291,7 +342,7 @@ in
     fi
     '';
     symlinkRootGitconfig.text = ''
-    if [ ! -L /root/.gitconfig ] || [ "$(readlink -f /root/.gitconfig)":wq != "${home}.gitconfig" ]; then
+    if [ ! -L /root/.gitconfig ] || [ "$(readlink -f /root/.gitconfig)" != "${home}.config/shared/gitconfig" ]; then
       ln -sf ${home}.config/shared/gitconfig /root/.gitconfig
     fi
     '';
@@ -302,60 +353,6 @@ in
       ln -sf ${home}.local/share/nvim /root/.local/share/nvim
     fi
     '';
-  };
-
-  # fileSystems = {
-  #   "/var/lib/prowlarr" = {
-  #     device = "{pkgs.prowlarr}";
-  #     options = [ "bind" "rw" ];
-  #     fsType = "none";
-  #   };
-  # };
-
-  systemd = {
-    tmpfiles.rules = [
-      "d /mnt 0755 root root"
-      # "d /var/lib/radarr/ 0755 radarr radarr"
-      "d /var/lib/prowlarr/ 0755 prowlarr prowlarr"
-      "d /var/www/ 0755 root root"
-      "d /var/www/baikal/config 0755 root root"
-      "d /var/www/baikal/Specific 0755 root root"
-      "d ${home}torrents 0775 ${me} torrent"
-      "d ${home}writes 0700 ${me} users"
-      "d ${home}Music 0775 ${me} torrent"
-      #"d ${home}calendar 0755 ${me} calendar"
-      "d ${home}code 0755 ${me} users"
-    ];
-    services = {
-      # TODO
-      #autoSway = {
-      #  enable = true;
-      #  description = "Start sway on login";
-      #  wants = [ "graphical.target" ];
-      #  after = [ "graphical.target" ];
-      #  serviceConfig = {
-      #    Type = "simple";
-      #    Restart = "always";
-      #    User = "%u";
-      #    PAMName = "login";
-      #    Environment = ''"XDG_RUNTIME_DIR=/run/user/%U"'';
-      #    ExecStart = ''/bin/sh -c 'sway' '';
-      #  };
-      #};
-      incrementTTL = {
-        enable = true;
-        description = "Increment TTL by 1 to avoid tunnel traffic detection";
-        wantedBy = [ "multi-user.target" ];
-        after = [ "sysinit.target" ];
-        serviceConfig = {
-	        Type = "oneshot";
-	        # oh god oh fuck
-          ExecStart = ''/bin/sh -c 'echo $(( $(cat /proc/sys/net/ipv6/conf/default/hop_limit) + 1 )) > /proc/sys/net/ipv6/conf/default/hop_limit && echo $(( $(cat /proc/sys/net/ipv4/ip_default_ttl) + 1 )) > /proc/sys/net/ipv4/ip_default_ttl' '';
-        };
-      };
-    };
-    user.services = {
-    };
   };
 
   xdg = {
@@ -374,19 +371,6 @@ in
     };
   };
 
-  programs = {
-    sway.enable = true;
-    nix-ld.enable = true;
-    steam = {
-      enable = true;
-      remotePlay.openFirewall = true;
-      dedicatedServer.openFirewall = true;
-      localNetworkGameTransfers.openFirewall = true;
-      gamescopeSession.enable = true;
-      package = pkgs.steam.override {};
-    };
-  };
-
   security.rtkit.enable = true;
 
   hardware.bluetooth.enable = true;
@@ -395,7 +379,7 @@ in
     enable = true;
     extraPackages = with pkgs; [
       intel-media-sdk
-    ];  
+    ];
   };
 
 

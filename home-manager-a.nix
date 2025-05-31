@@ -1,7 +1,11 @@
-{ lib, pkgs, config, osConfig, ... }: 
+{ lib, pkgs, config, ... }:
+let
+  vars = import ./vars.nix;
+  secrets = import ./secrets.nix;
+in
 {
   home = {
-    stateVersion = "24.11";
+    stateVersion = "${vars.homeManagerVersion}";
   };
   programs = {
     git = {
@@ -57,6 +61,12 @@
         "audio" = "vlc.desktop";
         #"text/calendar"
       };
+    };
+  };
+  dconf.settings = {
+    "org/virt-manager/virt-manager/connections" = {
+      autoconnect = ["qemu:///system"];
+      uris = ["qemu:///system"];
     };
   };
 }
