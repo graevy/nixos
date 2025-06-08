@@ -20,7 +20,7 @@
     yazi
     # xdg-desktop-portal-termfilechooser
 
-    man-pages 
+    man-pages
     man-pages-posix
 
     go
@@ -43,7 +43,7 @@
     openssl
     inetutils
     mosh
-    nginx
+    caddy
     wireshark
     wireguard-tools
 
@@ -170,7 +170,7 @@
 	      ms-python.python
 	      rust-lang.rust-analyzer
         # idk if defining this outside of this block matters yet
-	      #vadimcn.vscode-lldb
+	      vadimcn.vscode-lldb
 	      ms-vscode-remote.remote-ssh
 	      continue.continue
 	    ];
