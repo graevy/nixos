@@ -161,9 +161,10 @@ in
 
   services = {
 
-    dbus.enable = true;
+    dbus.enable = true;     # likely doesn't need to be explicitly enabled because of sway
     thermald.enable = true; # intel cpu thermal throttling
     libinput.enable = true; # touchpad support
+    upower.enable = true;   # so that apps can query power status. privacy meh, performance optimization for firefox yay
 
     # many of these are disabled in systemd.services.<service>.wantedBy below
     openssh.enable = true;
