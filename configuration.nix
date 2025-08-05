@@ -32,13 +32,14 @@ in
 
   nixpkgs = {
     # if i ever bother to switch to unstables
-    # config = {
+    config = {
+      allowUnfree = true;
     #  packageOverrides = pkgs: {
     #    unstable = import unstableTarball {
     #      config = config.nixpkgs.config;
     #    };
     #  };
-    # };
+    };
     overlays = [
       # https://github.com/NixOS/nixpkgs/issues/371837
       (final: prev: { 
@@ -146,7 +147,7 @@ in
 
   programs = {
     sway.enable = true;
-    nix-ld.enable = false; # maybe
+    nix-ld.enable = true; # maybe
     virt-manager.enable = true;
     steam = {
       enable = true;
@@ -159,12 +160,15 @@ in
   };
 
   services = {
+
+    dbus.enable = true;
+    thermald.enable = true; # intel cpu thermal throttling
+    libinput.enable = true; # touchpad support
+
     # many of these are disabled in systemd.services.<service>.wantedBy below
     openssh.enable = true;
     printing.enable = true; # CUPS
     ollama.enable = false;
-    thermald.enable = true; # intel cpu thermal throttling
-    libinput.enable = true; # touchpad support
     tor = {
       enable = true;
       client.enable = true; # faster client port, default 9063
@@ -269,7 +273,7 @@ in
   systemd = {
     services = {
       # this is the simplest nixos pattern i have found to (manually) lazy-load services.
-      # `services.printing.enabled = false` means the unit file doesn't get created; can't `systemctl start cups`
+      # `services.printing.enabled = false` means the unit file doesn't get created; can't `systemctl start cups` without this
       # note that the initial declaration is in services, not systemd.services;
       # declaring custom services here would also work, but is less stable
       printing.wantedBy = lib.mkForce [ ];
@@ -355,17 +359,36 @@ in
     '';
   };
 
-  xdg = {
-    portal = {
-      wlr = {
-        enable = true;
-        settings = {
-          screencast = {
-            output_name = "eDP-1";
-            max_fps = 30;
-            chooser_type = "simple";
-            chooser_cmd = "${pkgs.slurp}/bin/slurp -f %o -or";
-          };
+xdg.portal = {
+  enable = true;
+  extraPortals = with pkgs; [
+    xdg-desktop-portal-gtk
+    kdePackages.xdg-desktop-portal-kde
+    xdg-desktop-portal-wlr
+  ];
+  config = {
+    common = {
+      default = ["kde"];
+      "org.freedesktop.impl.portal.Settings" = ["kde"];
+    };
+    sway = {
+      # setting sway.enable by default sets this to gtk
+      # wlr has features, gtk has compatibility
+      # try wlr first, then fallback to gtk
+      default = lib.mkForce ["wlr" "gtk"];
+      "org.freedesktop.impl.portal.Screenshot" = ["wlr"];
+      "org.freedesktop.impl.portal.ScreenCast" = ["wlr"];
+    };
+  };
+  xdgOpenUsePortal = true;
+  wlr = {
+    enable = true;
+    settings = {
+      screencast = {
+        output_name = "eDP-1";
+        max_fps = 30;
+        chooser_type = "simple";
+        chooser_cmd = "${pkgs.slurp}/bin/slurp -f %o -or";
         };
       };
     };

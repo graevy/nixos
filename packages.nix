@@ -17,7 +17,7 @@
     kdePackages.kdialog
     kdePackages.xdg-desktop-portal-kde
     kdePackages.dolphin
-    yazi
+    # yazi
     # xdg-desktop-portal-termfilechooser
 
     man-pages
@@ -26,10 +26,13 @@
     go
     rustc
     cargo
+    clippy
     python3
     typescript
     nodejs
     gdb
+    jre_minimal
+    jq
 
     wget
     curl
@@ -52,6 +55,8 @@
 
     k9s
     kubectl
+    kubernetes-helm
+    fluxcd
 
     git
     git-lfs
@@ -106,6 +111,7 @@
     ripgrep
     fd
     fzf
+    tree
 
     feh
     imagemagick
@@ -113,6 +119,7 @@
     lyx
     tectonic # latex rendering
     mermaid-cli # mermaid diagrams
+    vdirsyncer # caldav client cli
 
     prowlarr
     jackett
@@ -131,25 +138,26 @@
     signal-desktop
     anki
 
-    (pkgs.writeTextFile {
-      name = "yazi-choose.desktop";
-      text =
-        ''
-        [Desktop Entry]
-        Name=Yazi Chooser
-        Icon=yazi
-        Comment=launch yazi as a file chooser
-        Terminal=true
-        TryExec=yazi
-        Exec=yazi %u --chooser-file -
-        X-Desktop-Portal-Interfaces=org.freedesktop.impl.portal.FileChooser
-        Type=Application
-        MimeType=inode/directory;x-scheme-handler/file;
-        Categories=Utility;Core;System;FileTools;FileManager;ConsoleOnly
-        Keywords=File;Manager;Explorer;Browser;Launcher
-        '';
-      destination = "/share/applications/yazi-pick.desktop";
-    })
+    # hiding this crime for now. seems like we have to use kde or dolphin as a file chooser :l
+    # (pkgs.writeTextFile {
+    #   name = "yazi-choose.desktop";
+    #   text =
+    #     ''
+    #     [Desktop Entry]
+    #     Name=Yazi Chooser
+    #     Icon=yazi
+    #     Comment=launch yazi as a file chooser
+    #     Terminal=true
+    #     TryExec=yazi
+    #     Exec=yazi %u --chooser-file -
+    #     X-Desktop-Portal-Interfaces=org.freedesktop.impl.portal.FileChooser
+    #     Type=Application
+    #     MimeType=inode/directory;x-scheme-handler/file;
+    #     Categories=Utility;Core;System;FileTools;FileManager;ConsoleOnly
+    #     Keywords=File;Manager;Explorer;Browser;Launcher
+    #     '';
+    #   destination = "/share/applications/yazi-pick.desktop";
+    # })
 
     # this is the result of at least 5 hours of nixos-rebuild internals hell.
     # codelldb is a vscode extension. its binary is at /nix/store/<hash>-<name>/shared/.../codelldb,
