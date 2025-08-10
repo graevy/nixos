@@ -29,7 +29,7 @@ in
       defaultApplications = {
         "text/html" = "firefox.desktop";
         "x-scheme-handler/file" = "org.kde.dolphin.desktop";
-        "inode/directory" = "alacritty.desktop";
+        "inode/directory" = "org.kde.dolphin.desktop";
         "image/jpeg" = "feh.desktop";
         "image/png" = "feh.desktop";
 
@@ -38,9 +38,9 @@ in
         "x-scheme-handler/about" = "firefox.desktop";
         "x-scheme-handler/unknown" = "firefox.desktop";
         # "x-scheme-handler/mailto";
-
-        "video" = "vlc.desktop";
-        "audio" = "vlc.desktop";
+        #
+        # "video" = "vlc.desktop";
+        # "audio" = "vlc.desktop";
         #"text/calendar"
       };
     };

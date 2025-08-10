@@ -15,24 +15,10 @@
     wl-clipboard
     killall
     kdePackages.kdialog
-    kdePackages.xdg-desktop-portal-kde
     kdePackages.dolphin
-    # yazi
-    # xdg-desktop-portal-termfilechooser
 
     man-pages
     man-pages-posix
-
-    go
-    rustc
-    cargo
-    clippy
-    python3
-    typescript
-    nodejs
-    gdb
-    jre_minimal
-    jq
 
     wget
     curl
@@ -119,7 +105,6 @@
     lyx
     tectonic # latex rendering
     mermaid-cli # mermaid diagrams
-    vdirsyncer # caldav client cli
 
     prowlarr
     jackett
@@ -175,14 +160,25 @@
 
     (vscode-with-extensions.override {
       vscodeExtensions = with vscode-extensions; [
-	      ms-python.python
-	      rust-lang.rust-analyzer
-        # idk if defining this outside of this block matters yet
-	      vadimcn.vscode-lldb
-	      ms-vscode-remote.remote-ssh
-	      continue.continue
-	    ];
-	  })
+        ms-python.python
+        ms-python.debugpy
+        rust-lang.rust-analyzer
+        vadimcn.vscode-lldb
+        ms-vscode-remote.remote-ssh
+        continue.continue
+      ];
+    })
+
+    go
+    rustc
+    cargo
+    clippy
+    (python3.withPackages (ps: [ ps.debugpy ]))
+    typescript
+    nodejs
+    gdb
+    jre_minimal
+    jq
 
     clang
     clang-tools
@@ -200,7 +196,7 @@
 
   # nix documentation is so bad
   # fill this with strings
-  # for each package in systemPackages, if it has a subdir matching one of the strings,
+  # for each package in systemPackages, if it has a subdir matching one of these strings,
   # add it to the derivation for that string that is about to be created.
   #environment.pathsToLink = [
   #];

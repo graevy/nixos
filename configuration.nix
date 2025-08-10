@@ -146,7 +146,9 @@ in
   };
 
   programs = {
-    sway.enable = true;
+    sway = {
+      enable = true;
+    };
     nix-ld.enable = true; # maybe
     virt-manager.enable = true;
     steam = {
@@ -313,7 +315,17 @@ in
         bindsTo = lib.mkForce [ "torrent.target" ];
         wantedBy = lib.mkForce [ "torrent.target" ];
       };
-
+    };
+    user.services = {
+      # xdg-desktop-portal needs user $PATH to open applications correctly
+      # https://github.com/flatpak/xdg-desktop-portal-gtk/issues/440
+      xdg-desktop-portal = {
+        serviceConfig = {
+          Environment = [
+            "PATH=/run/current-system/sw/bin:/etc/profiles/per-user/%i/bin:$PATH"
+          ];
+        };
+      };
     };
     targets.torrent = {
       description = "start/stop torrents";
@@ -360,37 +372,45 @@ in
     '';
   };
 
-xdg.portal = {
-  enable = true;
-  extraPortals = with pkgs; [
-    xdg-desktop-portal-gtk
-    kdePackages.xdg-desktop-portal-kde
-    xdg-desktop-portal-wlr
-  ];
-  config = {
-    common = {
-      default = ["kde"];
-      "org.freedesktop.impl.portal.Settings" = ["kde"];
-    };
-    sway = {
-      # setting sway.enable by default sets this to gtk
-      # wlr has features, gtk has compatibility
-      # try wlr first, then fallback to gtk
-      default = lib.mkForce ["wlr" "gtk"];
-      "org.freedesktop.impl.portal.Screenshot" = ["wlr"];
-      "org.freedesktop.impl.portal.ScreenCast" = ["wlr"];
-    };
-  };
-  xdgOpenUsePortal = true;
-  wlr = {
-    enable = true;
-    settings = {
-      screencast = {
-        output_name = "eDP-1";
-        max_fps = 30;
-        chooser_type = "simple";
-        chooser_cmd = "${pkgs.slurp}/bin/slurp -f %o -or";
+  xdg = {
+    portal = {
+      enable = true;
+      extraPortals = with pkgs; [
+        xdg-desktop-portal-gtk
+        # kdePackages.xdg-desktop-portal-kde # maybe later idk
+        xdg-desktop-portal-wlr
+      ];
+      config = {
+        sway = {
+          # setting sway.enable by default sets this to gtk
+          # wlr has features, gtk has compatibility
+          # try wlr first, then fallback to gtk
+          default = lib.mkForce [ "wlr" "gtk" ];
+          "org.freedesktop.impl.portal.Screenshot" = ["wlr"];
+          "org.freedesktop.impl.portal.ScreenCast" = ["wlr"];
         };
+      };
+      xdgOpenUsePortal = true;
+      wlr = {
+        enable = true;
+        settings = {
+          screencast = {
+            output_name = "eDP-1";
+            max_fps = 30;
+            chooser_type = "simple";
+            chooser_cmd = "${pkgs.slurp}/bin/slurp -f %o -or";
+          };
+        };
+      };
+    };
+    mime = {
+      enable = true;
+      defaultApplications = {
+        "x-scheme-handler/http" = "firefox.desktop";
+        "x-scheme-handler/https" = "firefox.desktop";
+        "text/html" = "firefox.desktop";
+        "x-scheme-handler/file" = "org.kde.dolphin.desktop";
+        "inode/directory" = "org.kde.dolphin.desktop";
       };
     };
   };
