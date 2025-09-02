@@ -68,7 +68,6 @@ in
 
   networking = {
     hostName = "very";
-    # domain = "lol.local";
     networkmanager.enable = true;
     firewall.enable = false;
     #firewall.allowedTCPPorts = [ ... ];
@@ -85,8 +84,10 @@ in
       EDITOR = "nvim";
       VISUAL = "nvim";
       TERM = "alacritty";
-      XCURSOR_SIZE = 24;
+      XCURSOR_SIZE = "24";
       GTK_USE_PORTAL = "1";
+      # default to wayland
+      NIXOS_OZONE_WL = "1";
     };
   };
 
@@ -150,6 +151,10 @@ in
       enable = true;
     };
     nix-ld.enable = true; # maybe
+    direnv = {
+      enable = true;
+      nix-direnv.enable = true;
+    };
     virt-manager.enable = true;
     steam = {
       enable = true;
@@ -170,7 +175,7 @@ in
 
     # many of these are disabled in systemd.services.<service>.wantedBy below
     openssh.enable = true;
-    printing.enable = true; # CUPS
+    printing.enable = false; # CUPS
     ollama.enable = false;
     tor = {
       enable = true;

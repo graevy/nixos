@@ -32,12 +32,10 @@
     openssl
     inetutils
     mosh
-    caddy
     wireshark
     wireguard-tools
-
+    caddy
     hugo
-    tor
 
     k9s
     kubectl
@@ -47,10 +45,10 @@
     git
     git-lfs
     lazygit
+    mlocate
     nix-tree
     nix-search-cli
     nix-inspect
-    mlocate
 
     mariadb
     postgresql
@@ -102,26 +100,27 @@
     feh
     imagemagick
     viu
-    lyx
     tectonic # latex rendering
     mermaid-cli # mermaid diagrams
 
     prowlarr
     jackett
     lidarr
+    radarr
     yt-dlp
 
     firefox
+    tor
     torsocks
     tor-browser
     vlc
     libreoffice
-    gimp
+    foliate # ebooks
+    anki # flash cards
     discord
     element-desktop
     telegram-desktop
     signal-desktop
-    anki
 
     # hiding this crime for now. seems like we have to use kde or dolphin as a file chooser :l
     # (pkgs.writeTextFile {
@@ -169,17 +168,20 @@
       ];
     })
 
+    # generally i want to put languages and their associated debuggers/linters/etc in flakes instead
+    # some of them want to live on the system generally, like python, which i use often as a calculator
     go
-    rustc
-    cargo
-    clippy
+    # rustc
+    # cargo
+    # clippy
     (python3.withPackages (ps: [ ps.debugpy ]))
     typescript
     nodejs
-    gdb
     jre_minimal
     jq
 
+    # neovim wants imperative LSPs though
+    gdb
     clang
     clang-tools
     lua-language-server
