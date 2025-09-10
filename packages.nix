@@ -64,7 +64,6 @@
     qemu
 
     syncthing
-    kid3-cli
 
     vulkan-loader
     vulkan-tools
@@ -96,6 +95,7 @@
     fd
     fzf
     tree
+    usbutils
 
     feh
     imagemagick
