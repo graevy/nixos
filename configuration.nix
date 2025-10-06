@@ -7,8 +7,8 @@ let
   secrets = import ./secrets.nix;
 
   # unstableTarball = fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz";
-  home-manager = fetchTarball
-    "https://github.com/nix-community/home-manager/archive/release-${vars.homeManagerVersion}.tar.gz";
+  # home-manager = fetchTarball
+  #   "https://github.com/nix-community/home-manager/archive/release-${vars.homeManagerVersion}.tar.gz";
   nixpkgs = import <nixpkgs> {};
 in
 {
