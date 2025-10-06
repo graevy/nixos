@@ -7,7 +7,6 @@
 
   environment.systemPackages = with pkgs; [
     vim
-    helix
     alacritty
     dmenu-rs
     tmux
@@ -64,6 +63,7 @@
     qemu
 
     syncthing
+    keepassxc
 
     vulkan-loader
     vulkan-tools
@@ -96,6 +96,7 @@
     fzf
     tree
     usbutils
+    jq
 
     feh
     imagemagick
@@ -170,7 +171,6 @@
 
     # generally i want to put languages and their associated debuggers/linters/etc in flakes instead
     # some of them want to live on the system generally, like python, which i use often as a calculator
-    go
     # rustc
     # cargo
     # clippy
@@ -178,7 +178,6 @@
     typescript
     nodejs
     jre_minimal
-    jq
 
     # neovim wants imperative LSPs though
     gdb
