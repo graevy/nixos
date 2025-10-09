@@ -15,6 +15,7 @@
     killall
     kdePackages.kdialog
     kdePackages.dolphin
+    sops
 
     man-pages
     man-pages-posix

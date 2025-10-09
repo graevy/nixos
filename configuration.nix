@@ -4,11 +4,7 @@ let
   me = "a";
   home = "/home/${me}/";
   vars = import ./vars.nix;
-  secrets = import ./secrets.nix;
 
-  # unstableTarball = fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz";
-  # home-manager = fetchTarball
-  #   "https://github.com/nix-community/home-manager/archive/release-${vars.homeManagerVersion}.tar.gz";
   nixpkgs = import <nixpkgs> {};
 in
 {
@@ -16,7 +12,7 @@ in
     [
       ./hardware-configuration.nix
       ./packages.nix
-      (import "${home-manager}/nixos")
+      # (import "${home-manager}/nixos")
     ];
 
   # Use the systemd-boot EFI boot loader.
@@ -34,11 +30,6 @@ in
     # if i ever bother to switch to unstables
     config = {
       allowUnfree = true;
-    #  packageOverrides = pkgs: {
-    #    unstable = import unstableTarball {
-    #      config = config.nixpkgs.config;
-    #    };
-    #  };
     };
     overlays = [
       # https://github.com/NixOS/nixpkgs/issues/371837
@@ -56,6 +47,23 @@ in
     };
   };
 
+  # secrets manager, input from flake
+  sops = {
+    defaultSopsFile = ./secrets/secrets.json;
+    defaultSopsFormat = "json";
+    
+    # maybe wants a separate key eventually
+    age.keyFile = "${home}.config/sops/age/keys.txt";
+    
+    secrets = {
+      baby_syncthing_id = { format = "json"; };
+      kob_syncthing_id = { format = "json"; };
+      baby_syncthing_music_folder_id = { format = "json"; };
+      baby_syncthing_books_folder_id = { format = "json"; };
+    };
+    templates = {};
+  };
+
   time.timeZone = "America/Los_Angeles";
 
   i18n.defaultLocale = "en_US.UTF-8";
@@ -70,13 +78,6 @@ in
     hostName = "very";
     networkmanager.enable = true;
     firewall.enable = false;
-    #firewall.allowedTCPPorts = [ ... ];
-    #firewall.allowedUDPPorts = [ ... ];
-    #proxy.default = "http://user:password@proxy:port/";
-    #proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-    # extraHosts = ''
-    # 127
-    # '';
   };
 
   environment = {
@@ -108,33 +109,20 @@ in
       isSystemUser = true;
       group = "prowlarr";
       home = "/var/lib/prowlarr";
-      shell = "/run/current-system/sw/bin/nologin";
+      # shell = "/run/current-system/sw/bin/nologin";
     };
   };
 
   # virtualisation = {
   #   libvirtd.enable = true;
   #   spiceUSBRedirection.enable = true;
-    # TODO
-    # docker = {
-    #   enable = true;
-    # };
-    # oci-containers = {
-    #   backend = "docker";
-    #   containers = {
-    #     baikal = {
-    #       image = "ckulka/baikal";
-    #       autoStart = false;
-    #       ports = [ "0.0.0.0:8080:80" ];
-    #       volumes = [
-    #         "/var/lib/baikal:/var/www/baikal/Specific"
-    #       ];
-    #       environment = {
-    #         BAIKAL_DAV_AUTH_TYPE = "Digest";
-    #       };
-    #     };
-    #   };
-    # };
+  #   docker = {
+  #     enable = true;
+  #   };
+  #   oci-containers = {
+  #     backend = "docker";
+  #     containers = {}
+  #   };
   # };
 
   users.groups = {
@@ -185,13 +173,13 @@ in
       enable = true;
       user = "${me}";
       group = "headscale";
-      address = secrets.headscale_address;
-      port = secrets.headscale_port;
+      address = "127.0.0.1";
+      port = 64081;
       settings = {
         dns = {
           magic_dns = true;
-          base_domain = secrets.headscale_base_domain;
-          search_domains = secrets.headscale_search_domains;
+          base_domain = "very.local";
+          search_domains = [];
         };
       };
     };
@@ -218,7 +206,7 @@ in
       enable = true;
       package = pkgs.jackett;
       dataDir = "/var/lib/jackett";
-      port = secrets.jackett_port;
+      port = 9697;
     };
     transmission = {
       enable = true;
@@ -226,8 +214,8 @@ in
       user = "${me}";
       settings = {
         download-dir = "${home}torrents";
-        rpc-bind-address = secrets.transmission_rpc_bind_address;
-	      rpc-whitelist = secrets.transmission_rpc_whitelist;
+        rpc-bind-address = "127.0.0.1";
+	      rpc-whitelist = "127.0.0.1";
 	      rpc-whitelist-enabled = false;
       };
     };
@@ -260,17 +248,17 @@ in
       overrideFolders = true;
       settings = {
         devices = {
-          "baby" = { id = secrets.baby_syncthing_id; };
-          "kob" = { id = secrets.kob_syncthing_id; };
+          "baby" = { id = "QA46X3F-UHHIGX3-4H4KG5Y-ULQBBKL-4VRDYUF-KRX26YZ-AMXCO3F-NYJSXQO"; };
+          "kob" = { id = ""; };
         };
         folders = {
-          "${secrets.baby_syncthing_music_folder_id}" = {
-            path = "~/Music";
+          "j0z43-s5odd" = {
+            path = "${home}Music";
             devices = [ "baby" ];
             ignorePerms = false;  # "don't sync file perms by default"
           };
-          "${secrets.baby_syncthing_books_folder_id}" = {
-            path = "~/Documents/books";
+          "books-42069" = {
+            path = "${home}Documents/books";
             devices = [ "baby" "kob" ];
             ignorePerms = false;
           };
@@ -327,7 +315,7 @@ in
       xdg-desktop-portal = {
         serviceConfig = {
           Environment = [
-            "PATH=/run/current-system/sw/bin:/etc/profiles/per-user/%i/bin:$PATH"
+            ''PATH=/run/current-system/sw/bin:/etc/profiles/per-user/%i/bin:$PATH''
           ];
         };
       };
@@ -430,12 +418,6 @@ in
       intel-media-sdk
     ];
   };
-
-
-  # Copy the NixOS configuration file and link it from the resulting system
-  # (/run/current-system/configuration.nix). This is useful in case you
-  # accidentally delete configuration.nix.
-  system.copySystemConfiguration = true;
 
   # don't touch it
   system.stateVersion = "24.11"; # don't you dare

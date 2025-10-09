@@ -1,4 +1,3 @@
-hardware-configuration.nix
-secrets.nix
+.sops.yaml
 
 result
