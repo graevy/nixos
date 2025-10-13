@@ -151,7 +151,7 @@ in
           "--rpc-bind-address 127.0.0.1"
         ];
           ExecReload = "${pkgs.coreutils}/bin/kill -s HUP $MAINPID";
-          # Restart = "on-failure";
+          Restart = "on-failure";
         };
         Install = {
           WantedBy = [ "torrent.target" ];
@@ -162,7 +162,7 @@ in
     targets = {
       torrent = {
         Unit = {
-          Description = "manual torrent services target";
+          Description = "toggle torrent services via `systemctl --user [start|stop] torrent.target`";
         };
       };
     };

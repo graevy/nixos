@@ -11,7 +11,7 @@ in
       ./packages.nix
     ];
 
-  # Use the systemd-boot EFI boot loader.
+  # TODO: declare rEFInd
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
@@ -53,6 +53,7 @@ in
     age.keyFile = "${vars.homeDir}.config/sops/age/keys.txt";
     
     secrets = {
+      # TODO
       # gocryptfs-key = { format = "json"; };
       baby_syncthing_id = { format = "json"; };
       kob_syncthing_id = { format = "json"; };
@@ -132,7 +133,7 @@ in
   services = {
 
     dbus.enable = true;     # likely doesn't need to be explicitly enabled because of sway
-    thermald.enable = true; # intel cpu thermal throttling
+    thermald.enable = true; # intel cpu software thermal throttling
     libinput.enable = true; # touchpad support
     upower.enable = true;   # so that apps can query power status. privacy meh, performance optimization for firefox yay
 
@@ -200,9 +201,15 @@ in
         wantedBy = [ "multi-user.target" ];
         after = [ "sysinit.target" ];
         serviceConfig = {
-	        Type = "oneshot";
-	        # oh god oh fuck
-          ExecStart = ''/bin/sh -c 'echo $(( $(cat /proc/sys/net/ipv6/conf/default/hop_limit) + 1 )) > /proc/sys/net/ipv6/conf/default/hop_limit && echo $(( $(cat /proc/sys/net/ipv4/ip_default_ttl) + 1 )) > /proc/sys/net/ipv4/ip_default_ttl' '';
+          Type = "oneshot";
+          # oh god oh fuck
+          ExecStart = lib.concatStringsSep " " [
+            "/bin/sh" "-c"
+            "'read -r ipv6 < /proc/sys/net/ipv6/conf/default/hop_limit &&"
+            "echo $((ipv6 + 1)) > /proc/sys/net/ipv6/conf/default/hop_limit &&"
+            "read -r ipv4 < /proc/sys/net/ipv4/ip_default_ttl &&"
+            "echo $((ipv4 + 1)) > /proc/sys/net/ipv4/ip_default_ttl'"
+          ];
         };
       };
     };
@@ -229,17 +236,15 @@ in
       # my solution is to have both me and root symlink to a third e.g. .config/shared/bashrc, drw-r--r-- root root
       # i think most people would put this in /etc, but .config is included in my home dir monorepo
       # this works well except for ssh, because openssh is stingy about its perms
-      # but honestly, i just give root its own public keys, i think that's fine
       "L /root/.bashrc - - - - ${vars.homeDir}.config/shared/bashrc"
       "L /root/.gitconfig - - - - ${vars.homeDir}.config/shared/gitconfig"
-      # TODO this opens my user to run arbitrary lua as root
+      # TODO priv-esc
       "L /root/.local/share/nvim - - - - ${vars.homeDir}.local/share/nvim"
     ];
   };
 
-  system.activationScripts = {
-
-  };
+  # system.activationScripts = {
+  # };
 
   xdg = {
     portal = {
