@@ -1,10 +1,7 @@
 { config, lib, pkgs, ... }:
 
 let
-  me = "a";
-  home = "/home/${me}/";
   vars = import ./vars.nix;
-
   nixpkgs = import <nixpkgs> {};
 in
 {
@@ -12,7 +9,6 @@ in
     [
       ./hardware-configuration.nix
       ./packages.nix
-      # (import "${home-manager}/nixos")
     ];
 
   # Use the systemd-boot EFI boot loader.
@@ -33,16 +29,17 @@ in
     };
     overlays = [
       # https://github.com/NixOS/nixpkgs/issues/371837
-      (final: prev: { 
-        jackett = prev.jackett.overrideAttrs { doCheck = false; }; 
-      })
+      # (final: prev: { 
+      #   jackett = prev.jackett.overrideAttrs { doCheck = false; }; 
+      # })
     ];
   };
 
   home-manager = {
     backupFileExtension = "backup";
     users = {
-      "${me}" = import ./home-manager-a.nix;
+      "${vars.me}" = import ./home-manager-a.nix;
+      # lol
       root = import ./home-manager-a.nix;
     };
   };
@@ -53,9 +50,10 @@ in
     defaultSopsFormat = "json";
     
     # maybe wants a separate key eventually
-    age.keyFile = "${home}.config/sops/age/keys.txt";
+    age.keyFile = "${vars.homeDir}.config/sops/age/keys.txt";
     
     secrets = {
+      # gocryptfs-key = { format = "json"; };
       baby_syncthing_id = { format = "json"; };
       kob_syncthing_id = { format = "json"; };
       baby_syncthing_music_folder_id = { format = "json"; };
@@ -93,23 +91,11 @@ in
   };
 
   users.users = {
-    ${me} = {
+    ${vars.me} = {
       isNormalUser = true;
       extraGroups = [ "wheel" "networkmanager" "torrent" "docker" "libvirtd" ]; 
-      packages = with pkgs; [
-      ];
-    };
-    # radarr = {
-    #   isSystemUser = true;
-    #   group = "radarr";
-    #   home = "/var/lib/radarr";
-    #   shell = "/run/current-system/sw/bin/nologin";
-    # };
-    prowlarr = {
-      isSystemUser = true;
-      group = "prowlarr";
-      home = "/var/lib/prowlarr";
-      # shell = "/run/current-system/sw/bin/nologin";
+      # packages = with pkgs; [
+      # ];
     };
   };
 
@@ -127,9 +113,6 @@ in
 
   users.groups = {
     mlocate = {};
-    # radarr = {};
-    prowlarr = {};
-    torrent = {};
     headscale = {};
     libvirtd = {};
   };
@@ -144,14 +127,6 @@ in
       nix-direnv.enable = true;
     };
     virt-manager.enable = true;
-    steam = {
-      enable = true;
-      remotePlay.openFirewall = true;
-      dedicatedServer.openFirewall = true;
-      localNetworkGameTransfers.openFirewall = true;
-      gamescopeSession.enable = true;
-      package = pkgs.steam.override {};
-    };
   };
 
   services = {
@@ -171,7 +146,7 @@ in
     };
     headscale = {
       enable = true;
-      user = "${me}";
+      user = "${vars.me}";
       group = "headscale";
       address = "127.0.0.1";
       port = 64081;
@@ -190,35 +165,6 @@ in
       pulse.enable = true;
       jack.enable = false;
     };
-    # torrenting services
-    # radarr = {
-    #   enable = true;
-    #   openFirewall = true; # 7878
-    #   user = "radarr";
-    #   group = "radarr";
-    #   dataDir = "/var/lib/radarr";
-    # };
-    prowlarr = {
-      enable = true;
-      package = pkgs.prowlarr;
-    };
-    jackett = {
-      enable = true;
-      package = pkgs.jackett;
-      dataDir = "/var/lib/jackett";
-      port = 9697;
-    };
-    transmission = {
-      enable = true;
-      openRPCPort = true;
-      user = "${me}";
-      settings = {
-        download-dir = "${home}torrents";
-        rpc-bind-address = "127.0.0.1";
-	      rpc-whitelist = "127.0.0.1";
-	      rpc-whitelist-enabled = false;
-      };
-    };
     tlp = {
       enable = true;
       settings = {
@@ -235,34 +181,6 @@ in
 
        START_CHARGE_THRESH_BAT0 = 84; # starts-to-charge threshold
        STOP_CHARGE_THRESH_BAT0 = 85; # stops-charging threshold
-      };
-    };
-    syncthing = {
-      enable = true;
-      group = "users";
-      user = "${me}";
-      dataDir = "/var/lib/syncthing/";
-      configDir = "${home}.config/syncthing";
-      # override *WebUI* devices/folders
-      overrideDevices = true;
-      overrideFolders = true;
-      settings = {
-        devices = {
-          "baby" = { id = "QA46X3F-UHHIGX3-4H4KG5Y-ULQBBKL-4VRDYUF-KRX26YZ-AMXCO3F-NYJSXQO"; };
-          "kob" = { id = ""; };
-        };
-        folders = {
-          "j0z43-s5odd" = {
-            path = "${home}Music";
-            devices = [ "baby" ];
-            ignorePerms = false;  # "don't sync file perms by default"
-          };
-          "books-42069" = {
-            path = "${home}Documents/books";
-            devices = [ "baby" "kob" ];
-            ignorePerms = false;
-          };
-        };
       };
     };
   };
@@ -287,27 +205,6 @@ in
           ExecStart = ''/bin/sh -c 'echo $(( $(cat /proc/sys/net/ipv6/conf/default/hop_limit) + 1 )) > /proc/sys/net/ipv6/conf/default/hop_limit && echo $(( $(cat /proc/sys/net/ipv4/ip_default_ttl) + 1 )) > /proc/sys/net/ipv4/ip_default_ttl' '';
         };
       };
-
-      # in addition to lazy-loading services, bind them together as targets
-      # these torrent services are all bound to torrent.target, meaning they stop when torrent.target stops
-      # they're all wantedBy torrent.target, meaning they start when torrent.target starts.
-      # systemctl [start|stop] torrent.target toggles them all
-      # radarr = {
-      #   bindsTo = lib.mkForce [ "torrent.target" ];
-      #   wantedBy = lib.mkForce [ "torrent.target" ];
-      # };
-      prowlarr = {
-        bindsTo = lib.mkForce [ "torrent.target" ];
-        wantedBy = lib.mkForce [ "torrent.target" ];
-      };
-      jackett = {
-        bindsTo = lib.mkForce [ "torrent.target" ];
-        wantedBy = lib.mkForce [ "torrent.target" ];
-      };
-      transmission = {
-        bindsTo = lib.mkForce [ "torrent.target" ];
-        wantedBy = lib.mkForce [ "torrent.target" ];
-      };
     };
     user.services = {
       # xdg-desktop-portal needs user $PATH to open applications correctly
@@ -320,49 +217,28 @@ in
         };
       };
     };
-    targets.torrent = {
-      description = "start/stop torrents";
-      wantedBy = [ ];
-    };
     tmpfiles.rules = [
       "d /mnt 0755 root root"
-      # "d /var/lib/radarr/ 0755 radarr radarr"
-      "d /var/lib/prowlarr/ 0755 prowlarr prowlarr"
       "d /var/www/ 0755 root root"
-      "d ${home}torrents 0775 ${me} torrent"
-      "d ${home}writes 0700 ${me} users"
-      "d ${home}Music 0775 ${me} torrent"
-      #"d ${home}calendar 0755 ${me} calendar"
-      "d /var/www/baikal/config 0755 root root"
-      "d /var/www/baikal/Specific 0755 root root"
-      "d ${home}code 0755 ${me} users"
+      "d ${vars.homeDir}writes 0700 ${vars.me} users"
+      "d ${vars.homeDir}Music 0775 ${vars.me} torrent"
+      "d ${vars.homeDir}code 0755 ${vars.me} users"
+
+      # i want root to inherit my shell, git, nvim, ssh configs...however.
+      # symlinking /root/<config> to /home/me/<config> is a priv-esc risk
+      # my solution is to have both me and root symlink to a third e.g. .config/shared/bashrc, drw-r--r-- root root
+      # i think most people would put this in /etc, but .config is included in my home dir monorepo
+      # this works well except for ssh, because openssh is stingy about its perms
+      # but honestly, i just give root its own public keys, i think that's fine
+      "L /root/.bashrc - - - - ${vars.homeDir}.config/shared/bashrc"
+      "L /root/.gitconfig - - - - ${vars.homeDir}.config/shared/gitconfig"
+      # TODO this opens my user to run arbitrary lua as root
+      "L /root/.local/share/nvim - - - - ${vars.homeDir}.local/share/nvim"
     ];
   };
 
   system.activationScripts = {
-    # i want root to inherit my shell, git, nvim, ssh configs...however.
-    # symlinking /root/<config> to /home/me/<config> is a priv-esc risk
-    # my solution is to have both me and root symlink to a third e.g. .config/shared/bashrc, drw-r--r-- root root
-    # i think most people would put this in /etc, but .config is included in my home dir monorepo
-    # this works well except for ssh, because openssh is stingy about its perms
-    # but honestly, i just give root its own public keys, i think that's fine
-    symlinkRootBashrc.text = ''
-    if [ ! -L /root/.bashrc ] || [ "$(readlink -f /root/.bashrc)" != "${home}.config/shared/bashrc" ]; then
-      ln -sf ${home}.config/shared/bashrc /root/.bashrc
-    fi
-    '';
-    symlinkRootGitconfig.text = ''
-    if [ ! -L /root/.gitconfig ] || [ "$(readlink -f /root/.gitconfig)" != "${home}.config/shared/gitconfig" ]; then
-      ln -sf ${home}.config/shared/gitconfig /root/.gitconfig
-    fi
-    '';
-    # TODO i think this opens my user to run arbitrary lua as root?
-    symlinkRootNvim.text = ''
-    if [ ! -L /root/.local/share/nvim ] || [ "$(readlink -f /root/.local/share/nvim)" != "${home}.local/share/nvim" ]; then
-      mkdir -p /root/.local/share
-      ln -sf ${home}.local/share/nvim /root/.local/share/nvim
-    fi
-    '';
+
   };
 
   xdg = {

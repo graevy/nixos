@@ -9,7 +9,6 @@
     vim
     alacritty
     dmenu-rs
-    tmux
     i3status-rust
     wl-clipboard
     killall
@@ -31,6 +30,7 @@
     nmap
     openssl
     inetutils
+    tmux
     mosh
     wireshark
     wireguard-tools
@@ -81,6 +81,7 @@
     swappy
     slurp
 
+    gocryptfs
     ntfs3g
     exfatprogs
     nfs-utils
@@ -105,6 +106,7 @@
     tectonic # latex rendering
     mermaid-cli # mermaid diagrams
 
+    transmission_4
     prowlarr
     jackett
     lidarr
@@ -172,9 +174,6 @@
 
     # generally i want to put languages and their associated debuggers/linters/etc in flakes instead
     # some of them want to live on the system generally, like python, which i use often as a calculator
-    # rustc
-    # cargo
-    # clippy
     (python3.withPackages (ps: [ ps.debugpy ]))
     typescript
     nodejs
@@ -223,3 +222,4 @@
 
   ];
 }
+
