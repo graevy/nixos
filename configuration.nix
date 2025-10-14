@@ -193,7 +193,6 @@ in
       # declaring custom services here would also work, but is less stable
       printing.wantedBy = lib.mkForce [ ];
       headscale.wantedBy = lib.mkForce [ ];
-      syncthing.wantedBy = lib.mkForce [ ];
       tor.wantedBy = lib.mkForce [ ];
       incrementTTL = {
         enable = true;

@@ -7,7 +7,7 @@ in
 
   xdg = {
     configFile."nvim" = {
-      source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.local/share/nvim/";
+      source = config.lib.file.mkOutOfStoreSymlink "${vars.homeDir}.local/share/nvim/";
     };
     mimeApps = {
       enable = true;
@@ -75,7 +75,7 @@ in
 
   services = {
     syncthing = {
-      enable = true;
+      enable = false;
       # override *WebUI* devices/folders
       overrideDevices = true;
       overrideFolders = true;
@@ -164,6 +164,7 @@ in
         Unit = {
           Description = "toggle torrent services via `systemctl --user [start|stop] torrent.target`";
         };
+        Install.WantedBy = [ "" ];
       };
     };
 
