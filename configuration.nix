@@ -5,15 +5,37 @@ let
   nixpkgs = import <nixpkgs> {};
 in
 {
-  imports =
-    [
-      ./hardware-configuration.nix
-      ./packages.nix
-    ];
+  imports = [ ./hardware-configuration.nix ./packages.nix ];
 
-  # TODO: declare rEFInd
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+  boot = {
+    loader = {
+      systemd-boot.enable = true;
+      efi = {
+        canTouchEfiVariables = true;
+        efiSysMountPoint = "/boot";
+      };
+      # for 25.11 release
+      # will eventually want to switch to https://github.com/RefindPlusRepo/RefindPlus
+      # https://github.com/NixOS/nixpkgs/pull/414394#issuecomment-2949492057
+      # refind = {
+      #   enable = true;
+      #   version = "stable";
+      # };
+    };
+    kernel.sysctl = {
+      # default value is 60
+      # i really don't want to use swap unless i'm about to oom
+      "vm.swappiness" = 5;
+    };
+  };
+
+  swapDevices = [{
+    device = "/var/lib/swapfile";
+    size = 8*1024; # megs
+    options = [ "discard" ];
+    # encrypts ram contents so they don't leak to disk
+    randomEncryption.enable = true;
+  }];
 
   nix = {
     package = pkgs.nixVersions.stable;
@@ -27,12 +49,12 @@ in
     config = {
       allowUnfree = true;
     };
-    overlays = [
+    # overlays = [
       # https://github.com/NixOS/nixpkgs/issues/371837
       # (final: prev: { 
       #   jackett = prev.jackett.overrideAttrs { doCheck = false; }; 
       # })
-    ];
+    # ];
   };
 
   home-manager = {
@@ -55,10 +77,6 @@ in
     secrets = {
       # TODO
       # gocryptfs-key = { format = "json"; };
-      baby_syncthing_id = { format = "json"; };
-      kob_syncthing_id = { format = "json"; };
-      baby_syncthing_music_folder_id = { format = "json"; };
-      baby_syncthing_books_folder_id = { format = "json"; };
     };
     templates = {};
   };
@@ -242,8 +260,14 @@ in
     ];
   };
 
-  # system.activationScripts = {
-  # };
+  system.activationScripts = {
+    # https://www.rodsbooks.com/refind/themes.html
+    # set to a 1x1 black pixel so that the background isn't 7F7F7F fullbright grey
+    refindBlackBackground = {
+      text = ''${pkgs.imagemagick}/bin/magick -size 1x1 canvas:black /boot/efi/refind/background.png'';
+      # deps = [ "bootloader" ];
+    };
+  };
 
   xdg = {
     portal = {
@@ -302,3 +326,4 @@ in
   # don't touch it
   system.stateVersion = "24.11"; # don't you dare
 }
+

@@ -44,6 +44,7 @@
 
     git
     git-lfs
+    git-filter-repo
     lazygit
     mlocate
     nix-tree
@@ -99,6 +100,7 @@
     tree
     usbutils
     jq
+    yq
 
     feh
     imagemagick
