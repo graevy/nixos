@@ -108,6 +108,8 @@ in
 		GTK_USE_PORTAL = "1";
 		# default to wayland
 		NIXOS_OZONE_WL = "1";
+		# intel cpu hack
+		LIBVA_DRIVER_NAME = "iHD";
 	 };
   };
 
@@ -153,7 +155,7 @@ in
   services = {
 
 	 dbus.enable = true;		 # likely doesn't need to be explicitly enabled because of sway
-	 thermald.enable = true; # intel cpu software thermal throttling
+	 # thermald.enable = true; # intel cpu software thermal throttling
 	 libinput.enable = true; # touchpad support
 	 upower.enable = true;	 # so that apps can query power status. privacy meh, performance optimization for firefox yay
 
@@ -246,9 +248,10 @@ in
 	 tmpfiles.rules = [
 		"d /mnt 0755 root root"
 		"d /var/www/ 0755 root root"
-		"d ${vars.homeDir}writes 0700 ${vars.me} users"
-		"d ${vars.homeDir}Music 0775 ${vars.me} torrent"
 		"d ${vars.homeDir}code 0755 ${vars.me} users"
+		"d ${vars.homeDir}writes 0700 ${vars.me} users"
+		"d ${vars.homeDir}Music 0755 ${vars.me} users"
+		"d ${vars.homeDir}Pictures 0755 ${vars.me} users"
 
 		# i want root to inherit my shell, git, nvim, ssh configs...however.
 		# symlinking /root/<config> to /home/me/<config> is a priv-esc risk
@@ -315,15 +318,6 @@ in
   };
 
   security.rtkit.enable = true;
-
-  hardware.bluetooth.enable = true;
-
-  hardware.graphics= {
-	 enable = true;
-	 extraPackages = with pkgs; [
-		intel-media-sdk
-	 ];
-  };
 
   # don't touch it
   system.stateVersion = "24.11"; # don't you dare

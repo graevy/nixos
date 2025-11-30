@@ -37,6 +37,7 @@
     caddy
     hugo
 
+    podman
     k9s
     kubectl
     kubernetes-helm
@@ -79,7 +80,6 @@
     dust
 
     grim
-    swappy
     slurp
 
     gocryptfs
@@ -188,6 +188,10 @@
     lua-language-server
     rust-analyzer
     javascript-typescript-langserver
+
+	 # ai
+	 llm
+	 claude-code
 
     # games
     winetricks
