@@ -31,13 +31,13 @@ in
 		crashDump.enable = true;
 	};
 
-  swapDevices = [{
-	 device = "/var/lib/swapfile";
-	 size = 8*1024; # megs
-	 options = [ "discard" ];
-	 # encrypts ram contents so they don't leak to disk
-	 randomEncryption.enable = true;
-  }];
+  # swapDevices = [{
+	 # device = "/var/lib/swapfile";
+	 # size = 8*1024; # megs
+	 # options = [ "discard" ];
+	 # # encrypts ram contents so they don't leak to disk
+	 # randomEncryption.enable = true;
+  # }];
 
   nix = {
 	 package = pkgs.nixVersions.stable;

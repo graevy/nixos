@@ -40,6 +40,7 @@
     podman
     k9s
     kubectl
+	 kubelogin-oidc
     kubernetes-helm
     fluxcd
 
@@ -100,6 +101,7 @@
     tree
     usbutils
     jq
+	 jwt-cli
     yq
 
     feh
@@ -191,7 +193,6 @@
 
 	 # ai
 	 llm
-	 claude-code
 
     # games
     winetricks
