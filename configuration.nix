@@ -269,7 +269,7 @@ in
 	 # https://www.rodsbooks.com/refind/themes.html
 	 # set to a 1x1 black pixel so that the background isn't 7F7F7F fullbright grey
 	 refindBlackBackground = {
-		text = ''${pkgs.imagemagick}/bin/magick -size 1x1 canvas:black /boot/efi/refind/background.png'';
+		text = ''${pkgs.imagemagick}/bin/magick -size 1x1 canvas:black /boot/EFI/refind/background.png'';
 		# deps = [ "bootloader" ];
 	 };
   };
