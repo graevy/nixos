@@ -62,8 +62,10 @@ in
   programs = {
     git = {
       enable = true;
-      userName = "avery";
-      userEmail = "avry@pm.me";
+		settings.user = {
+			name = "avery";
+			email = "avery@cute.tg";
+		};
     };
     neovim = {
       enable = true;
