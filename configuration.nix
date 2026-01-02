@@ -31,6 +31,8 @@ in
 		crashDump.enable = true;
 	};
 
+  # unfortunately my laptop started crashing under load recently, much more often when swap is enabled.
+  # it's pushing 8 years now of very heavy use, can't really blame it.
   # swapDevices = [{
 	 # device = "/var/lib/swapfile";
 	 # size = 8*1024; # megs
@@ -253,14 +255,11 @@ in
 		"d ${vars.homeDir}Music 0755 ${vars.me} users"
 		"d ${vars.homeDir}Pictures 0755 ${vars.me} users"
 
-		# i want root to inherit my shell, git, nvim, ssh configs...however.
-		# symlinking /root/<config> to /home/me/<config> is a priv-esc risk
-		# my solution is to have both me and root symlink to a third e.g. .config/shared/bashrc, drw-r--r-- root root
-		# i think most people would put this in /etc, but .config is included in my home dir monorepo
-		# this works well except for ssh, because openssh is stingy about its perms
-		"L /root/.bashrc - - - - ${vars.homeDir}.config/shared/bashrc"
-		"L /root/.gitconfig - - - - ${vars.homeDir}.config/shared/gitconfig"
-		# TODO priv-esc
+		# root inherits my configs
+		# e.g. /home/a/.bashrc must be `drwxr--r-- root root` to avoid priv-esc on root shell
+		# this works well except for ssh, nvim...things i try not to do as root anyway
+		"L /root/.bashrc - - - - ${vars.homeDir}.bashrc"
+		"L /root/.gitconfig - - - - ${vars.homeDir}.gitconfig"
 		"L /root/.local/share/nvim - - - - ${vars.homeDir}.local/share/nvim"
 	 ];
   };
