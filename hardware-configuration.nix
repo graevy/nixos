@@ -29,13 +29,16 @@
       options = [ "fmask=0022" "dmask=0022" ];
     };
 
-  hardware.graphics = {
-	 enable = true;
-	 extraPackages = with pkgs; [
-      intel-media-driver     # VA-API decode/encode
-      vpl-gpu-rt             # QSV hardware acceleration replacement
-      intel-compute-runtime  # Optional OpenCL support
-	 ];
+  hardware = {
+    graphics = {
+	   enable = true;
+	   extraPackages = with pkgs; [
+	     intel-media-driver     # VA-API decode/encode
+	     vpl-gpu-rt             # QSV hardware acceleration replacement
+	     intel-compute-runtime  # Optional OpenCL support
+	   ];
+	 };
+	 bluetooth.enable = true;
   };
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
