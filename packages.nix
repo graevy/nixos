@@ -123,6 +123,7 @@
     tor-browser
     vlc
     libreoffice
+	 thunderbird
     foliate # ebooks
     anki # flash cards
     discord
