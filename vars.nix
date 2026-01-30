@@ -3,4 +3,5 @@
 
   me = "a";
   homeDir = "/home/a/";
+  hostName = "very";
 }

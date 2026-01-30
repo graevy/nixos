@@ -174,9 +174,13 @@ in
       "d %h/.local/share/transmission 0755 - - -"
       "d %h/.local/share/prowlarr 0755 - - -"
       "d %h/.local/share/jackett 0755 - - -"
-      # see tmpfiles.rules in configuration.nix for an explanation
-      "L %h/.bashrc - - - - ${vars.homeDir}.config/shared/bashrc"
-      "L %h/.gitconfig - - - - ${vars.homeDir}.config/shared/gitconfig"
+		# "d %h/.local/state/nix/profiles 0755 - - -"
+
+		"d ${vars.homeDir}code 0755 ${vars.me} users"
+		"d ${vars.homeDir}writes 0700 ${vars.me} users"
+		"d ${vars.homeDir}Music 0755 ${vars.me} users"
+		"d ${vars.homeDir}Pictures 0755 ${vars.me} users"
+
       "L %h/torrents - - - - %h/.local/share/transmission/torrents"
     ];
   };

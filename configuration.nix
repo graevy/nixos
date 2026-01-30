@@ -14,7 +14,7 @@ in
 		  canTouchEfiVariables = true;
 		  efiSysMountPoint = "/boot";
 		};
-		# for 25.11 release
+		# for 25.11?
 		# will eventually want to switch to https://github.com/RefindPlusRepo/RefindPlus
 		# https://github.com/NixOS/nixpkgs/pull/414394#issuecomment-2949492057
 		# refind = {
@@ -23,12 +23,9 @@ in
 		# };
 		};
 			kernel.sysctl = {
-			# default value is 60
-			# i really don't want to use swap unless i'm about to oom
+			# defaults to 60. i really don't want to use swap unless i'm about to oom
 			"vm.swappiness" = 10;
 		};
-		# been getting some crashes :l
-		crashDump.enable = true;
 	};
 
   # unfortunately my laptop started crashing under load recently, much more often when swap is enabled.
@@ -64,9 +61,8 @@ in
   home-manager = {
 	 backupFileExtension = "backup";
 	 users = {
-		"${vars.me}" = import ./home-manager-a.nix;
-		# lol
-		root = import ./home-manager-a.nix;
+		"${vars.me}" = import (./. + "/home-manager-${vars.me}.nix");
+		root = import (./. + "/home-manager-${vars.me}.nix");
 	 };
   };
 
@@ -96,7 +92,7 @@ in
 #	};
 
   networking = {
-	 hostName = "very";
+	 hostName = "${vars.hostName}";
 	 networkmanager.enable = true;
 	 firewall.enable = false;
   };
@@ -106,12 +102,22 @@ in
 		EDITOR = "nvim";
 		VISUAL = "nvim";
 		TERM = "alacritty";
-		XCURSOR_SIZE = "24";
-		GTK_USE_PORTAL = "1";
-		# default to wayland
-		NIXOS_OZONE_WL = "1";
+		XCURSOR_SIZE = 24;
+		# desktop portals
+		GTK_USE_PORTAL = 1;
+		GTK_THEME="Dracula";
+		# the "please god just fucking use wayland" env vars section
+		NIXOS_OZONE_WL = 1;
+		XDG_SESSION_TYPE="wayland";
+		QT_QPA_PLATFORM="wayland";
+		GDK_BACKEND="wayland";
+		MOZ_ENABLE_WAYLAND=1;
+		JBR_USE_WAYLAND=1;
+
 		# intel cpu hack
 		LIBVA_DRIVER_NAME = "iHD";
+		# need to tell java apps using awt that my windows are "nonreparenting" because sway
+		_JAVA_AWT_WM_NONREPARENTING = 1;
 	 };
   };
 
@@ -218,6 +224,7 @@ in
 		printing.wantedBy = lib.mkForce [ ];
 		headscale.wantedBy = lib.mkForce [ ];
 		tor.wantedBy = lib.mkForce [ ];
+
 		incrementTTL = {
 		  enable = true;
 		  description = "Increment TTL by 1 to avoid simple tunnel traffic detection";
@@ -250,13 +257,13 @@ in
 	 tmpfiles.rules = [
 		"d /mnt 0755 root root"
 		"d /var/www/ 0755 root root"
-		"d ${vars.homeDir}code 0755 ${vars.me} users"
-		"d ${vars.homeDir}writes 0700 ${vars.me} users"
-		"d ${vars.homeDir}Music 0755 ${vars.me} users"
-		"d ${vars.homeDir}Pictures 0755 ${vars.me} users"
+		# "d ${vars.homeDir}code 0755 ${vars.me} users"
+		# "d ${vars.homeDir}writes 0700 ${vars.me} users"
+		# "d ${vars.homeDir}Music 0755 ${vars.me} users"
+		# "d ${vars.homeDir}Pictures 0755 ${vars.me} users"
 
 		# root inherits my configs
-		# e.g. /home/a/.bashrc must be `drwxr--r-- root root` to avoid priv-esc on root shell
+		# e.g. /home/a/.bashrc must be `drw-r--r-- root root` to avoid priv-esc on root shell
 		# this works well except for ssh, nvim...things i try not to do as root anyway
 		"L /root/.bashrc - - - - ${vars.homeDir}.bashrc"
 		"L /root/.gitconfig - - - - ${vars.homeDir}.gitconfig"

@@ -103,6 +103,7 @@
     jq
 	 jwt-cli
     yq
+	 umlet
 
     feh
     imagemagick
