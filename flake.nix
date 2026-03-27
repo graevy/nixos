@@ -10,15 +10,18 @@
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, sops-nix, ... }: {
-    nixosConfigurations.a = nixpkgs.lib.nixosSystem {
+  outputs = { self, nixpkgs, home-manager, sops-nix, ... }:
+    let
+      vars = import ./vars.nix;
+    in {
+    nixosConfigurations.${vars.hostName} = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
         ./configuration.nix
         home-manager.nixosModules.home-manager
         sops-nix.nixosModules.sops
-      ];
+        ];
+      };
     };
-  };
 }
 

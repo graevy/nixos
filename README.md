@@ -5,5 +5,5 @@ recovery model is:
     - home dir (sops-nix should eventually replace this with a decryption step)
     - `/var/lib` maybe
     - `/etc/NetworkManager` maybe
-  - `su -c 'nixos-rebuild switch --flake /etc/nixos#a'`
+  - `su -c 'nixos-rebuild switch --flake'`
 

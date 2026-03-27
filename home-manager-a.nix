@@ -120,21 +120,21 @@ in
         };
       };
 
-      jackett = {
-        Unit = {
-          Description = "Jackett";
-          After = [ "network.target" ];
-          BindsTo = [ "torrent.target" ];
-        };
-        Service = {
-          Type = "simple";
-          ExecStart = "${pkgs.jackett}/bin/Jackett --NoRestart --DataFolder %h/.local/share/jackett --Port 9697";
-          Restart = "on-failure";
-        };
-        Install = {
-          WantedBy = [ "torrent.target" ];
-        };
-      };
+      # jackett = {
+      #   Unit = {
+      #     Description = "Jackett";
+      #     After = [ "network.target" ];
+      #     BindsTo = [ "torrent.target" ];
+      #   };
+      #   Service = {
+      #     Type = "simple";
+      #     ExecStart = "${pkgs.jackett}/bin/Jackett --NoRestart --DataFolder %h/.local/share/jackett --Port 9697";
+      #     Restart = "on-failure";
+      #   };
+      #   Install = {
+      #     WantedBy = [ "torrent.target" ];
+      #   };
+      # };
 
       transmission = {
         Unit = {

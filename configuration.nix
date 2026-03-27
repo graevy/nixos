@@ -22,10 +22,9 @@ in
 		#	 version = "stable";
 		# };
 		};
-			kernel.sysctl = {
-			# defaults to 60. i really don't want to use swap unless i'm about to oom
-			"vm.swappiness" = 10;
-		};
+
+		# defaults to 60. i really don't want to use swap unless i'm about to oom
+		kernel.sysctl."vm.swappiness" = 10;
 	};
 
   # unfortunately my laptop started crashing under load recently, much more often when swap is enabled.
@@ -34,7 +33,7 @@ in
 	 # device = "/var/lib/swapfile";
 	 # size = 8*1024; # megs
 	 # options = [ "discard" ];
-	 # # encrypts ram contents so they don't leak to disk
+	 # # encrypts ram contents so they don't leak to disk. appears to cause crashes?
 	 # randomEncryption.enable = true;
   # }];
 
@@ -51,9 +50,9 @@ in
 		allowUnfree = true;
 	 };
 	 # overlays = [
-		# https://github.com/NixOS/nixpkgs/issues/371837
+		# # https://github.com/NixOS/nixpkgs/issues/371837
 		# (final: prev: { 
-		#	 jackett = prev.jackett.overrideAttrs { doCheck = false; }; 
+		#  jackett = prev.jackett.overrideAttrs { doCheck = false; }; 
 		# })
 	 # ];
   };
@@ -125,8 +124,7 @@ in
 	 ${vars.me} = {
 		isNormalUser = true;
 		extraGroups = [ "wheel" "networkmanager" "torrent" "docker" "libvirtd" ]; 
-		# packages = with pkgs; [
-		# ];
+		# packages = with pkgs; [ ];
 	 };
   };
 
@@ -158,22 +156,35 @@ in
 		nix-direnv.enable = true;
 	 };
 	 virt-manager.enable = true;
+	 steam = {
+      enable = true;
+      remotePlay.openFirewall = true;
+      dedicatedServer.openFirewall = true;
+      localNetworkGameTransfers.openFirewall = true;
+    };
+
   };
 
   services = {
 
 	 dbus.enable = true;		 # likely doesn't need to be explicitly enabled because of sway
-	 # thermald.enable = true; # intel cpu software thermal throttling
 	 libinput.enable = true; # touchpad support
-	 upower.enable = true;	 # so that apps can query power status. privacy meh, performance optimization for firefox yay
+	 upower.enable = true;	 # so that apps can query power status. performance optimization for firefox
 
-	 # many of these are disabled in systemd.services.<service>.wantedBy below
+	 # many of these are disabled via systemd.services.<service>.wantedBy below
 	 openssh.enable = true;
-	 printing.enable = false; # CUPS
+	 printing.enable = true; # CUPS
 	 ollama.enable = false;
+	 # userspace-policing oom killer daemon sitting ahead of the kernelspace's
+	 earlyoom = {
+      enable = true; freeMemThreshold = 10; # freeSwapThreshold = 5; # percentage
+    };
+	 # link-local mDNS discovery
+	 avahi = {
+      enable = true; nssmdns4 = true; openFirewall = true;
+    };
 	 tor = {
-		enable = true;
-		client.enable = true; # faster client port, default 9063
+		enable = true; client.enable = true; # faster client port, default 9063
 	 };
 	 headscale = {
 		enable = true;
@@ -184,7 +195,7 @@ in
 		settings = {
 		  dns = {
 			 magic_dns = true;
-			 base_domain = "very.local";
+			 base_domain = "${vars.hostName}.local";
 			 search_domains = [];
 		  };
 		};
@@ -224,6 +235,7 @@ in
 		printing.wantedBy = lib.mkForce [ ];
 		headscale.wantedBy = lib.mkForce [ ];
 		tor.wantedBy = lib.mkForce [ ];
+		avahi.wantedBy = lib.mkForce [ ];
 
 		incrementTTL = {
 		  enable = true;
@@ -243,24 +255,16 @@ in
 		  };
 		};
 	 };
-	 user.services = {
-		# xdg-desktop-portal needs user $PATH to open applications correctly
-		# https://github.com/flatpak/xdg-desktop-portal-gtk/issues/440
-		xdg-desktop-portal = {
-		  serviceConfig = {
-			 Environment = [
+
+    # xdg-desktop-portal needs user $PATH to open applications correctly
+    # https://github.com/flatpak/xdg-desktop-portal-gtk/issues/440
+	 user.services.xdg-desktop-portal.serviceConfig.Environment = [
 				''PATH=/run/current-system/sw/bin:/etc/profiles/per-user/%i/bin:$PATH''
-			 ];
-		  };
-		};
-	 };
+    ];
+
 	 tmpfiles.rules = [
 		"d /mnt 0755 root root"
 		"d /var/www/ 0755 root root"
-		# "d ${vars.homeDir}code 0755 ${vars.me} users"
-		# "d ${vars.homeDir}writes 0700 ${vars.me} users"
-		# "d ${vars.homeDir}Music 0755 ${vars.me} users"
-		# "d ${vars.homeDir}Pictures 0755 ${vars.me} users"
 
 		# root inherits my configs
 		# e.g. /home/a/.bashrc must be `drw-r--r-- root root` to avoid priv-esc on root shell
@@ -285,7 +289,6 @@ in
 		enable = true;
 		extraPortals = with pkgs; [
 		  xdg-desktop-portal-gtk
-		  # kdePackages.xdg-desktop-portal-kde # maybe later idk
 		  xdg-desktop-portal-wlr
 		];
 		config = {

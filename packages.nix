@@ -113,10 +113,12 @@
 
     transmission_4
     prowlarr
-    jackett
+    # jackett
     lidarr
     radarr
     yt-dlp
+	 # i get bugs with transmission sometimes
+	 qbittorrent
 
     firefox
     tor
@@ -157,11 +159,10 @@
     # codelldb is a vscode extension. its binary is at /nix/store/<hash>-<name>/shared/.../codelldb,
     # and not /nix/store/<hash>-<name>/bin/codelldb.
     # this means the binary is not automatically linked in /run/current-system/sw/bin by nixos-rebuild,
-    # and is therefore not PATH-accessible. so of all the solutions i tried,
-    # this is the only one that declaratively met the criteria of:
-    # idempotently appending to PATH, presenting a binary (not a wrapper), readable, and near the package definition
+    # and is therefore not PATH-accessible. so of all the solutions i tried, this is the only solution that's:
+    # declarative, PATH-idempotent, providing a binary (not a wrapper), readable, and near the package definition
     vscode-extensions.vadimcn.vscode-lldb.adapter
-    # i also went for this to manually extract the adapter
+    # i also went for this to manually extract the adapter if anything breaks
     #(pkgs.runCommand "symlink-codelldb" { } ''
     #  mkdir -p $out/bin
     #  ln -s ${pkgs.vscode-extensions.vadimcn.vscode-lldb}/share/vscode/extensions/vadimcn.vscode-lldb/adapter/codelldb $out/bin/codelldb
