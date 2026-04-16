@@ -1,12 +1,5 @@
-{ config, lib, pkgs, ... }:
-
-let
-  vars = import ./vars.nix;
-  nixpkgs = import <nixpkgs> {};
-in
+{ config, lib, pkgs, vars, ... }:
 {
-  imports = [ ./hardware-configuration.nix ./packages.nix ];
-
   boot = {
 	 loader = {
 		systemd-boot.enable = true;

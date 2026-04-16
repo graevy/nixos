@@ -16,8 +16,11 @@
     in {
     nixosConfigurations.${vars.hostName} = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
+      specialArgs = { inherit vars; };
       modules = [
         ./configuration.nix
+		  ./hardware-configuration.nix
+		  ./packages.nix
         home-manager.nixosModules.home-manager
         sops-nix.nixosModules.sops
         ];
