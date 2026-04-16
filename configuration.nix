@@ -27,8 +27,6 @@ in
 		kernel.sysctl."vm.swappiness" = 10;
 	};
 
-  # unfortunately my laptop started crashing under load recently, much more often when swap is enabled.
-  # it's pushing 8 years now of very heavy use, can't really blame it.
   # swapDevices = [{
 	 # device = "/var/lib/swapfile";
 	 # size = 8*1024; # megs
@@ -105,17 +103,8 @@ in
 		# desktop portals
 		GTK_USE_PORTAL = 1;
 		GTK_THEME="Dracula";
-		# the "please god just fucking use wayland" env vars section
-		NIXOS_OZONE_WL = 1;
-		XDG_SESSION_TYPE="wayland";
-		QT_QPA_PLATFORM="wayland";
-		GDK_BACKEND="wayland";
-		MOZ_ENABLE_WAYLAND=1;
-		JBR_USE_WAYLAND=1;
 
-		# intel cpu hack
-		LIBVA_DRIVER_NAME = "iHD";
-		# need to tell java apps using awt that my windows are "nonreparenting" because sway
+		# need to tell java apps using awt that my windows are "nonreparenting" because tiling wm
 		_JAVA_AWT_WM_NONREPARENTING = 1;
 	 };
   };
@@ -147,9 +136,6 @@ in
   };
 
   programs = {
-	 sway = {
-		enable = true;
-	 };
 	 nix-ld.enable = true; # maybe
 	 direnv = {
 		enable = true;
@@ -165,11 +151,25 @@ in
 
   };
 
-  services = {
+# temporary -- remove after bootstrap
+hardware.nvidia = {
+modesetting.enable = true;
+open = false;
+nvidiaSettings = true;
+package = config.boot.kernelPackages.nvidiaPackages.stable;
+};
+hardware.graphics.enable = true;
+hardware.bluetooth.enable = true; 
 
-	 dbus.enable = true;		 # likely doesn't need to be explicitly enabled because of sway
-	 libinput.enable = true; # touchpad support
-	 upower.enable = true;	 # so that apps can query power status. performance optimization for firefox
+  services = {
+    xserver = {
+	   enable = true;
+      videoDrivers = [ "nvidia" ];
+		windowManager.i3.enable = true;
+		displayManager.lightdm.enable = true;
+	 };
+
+	 dbus.enable = true;		 # likely doesn't need to be explicitly enabled?
 
 	 # many of these are disabled via systemd.services.<service>.wantedBy below
 	 openssh.enable = true;
@@ -177,7 +177,7 @@ in
 	 ollama.enable = false;
 	 # userspace-policing oom killer daemon sitting ahead of the kernelspace's
 	 earlyoom = {
-      enable = true; freeMemThreshold = 10; # freeSwapThreshold = 5; # percentage
+      enable = true; freeMemThreshold = 5; freeSwapThreshold = 5; # percentage
     };
 	 # link-local mDNS discovery
 	 avahi = {
@@ -206,24 +206,6 @@ in
 		alsa.support32Bit = true;
 		pulse.enable = true;
 		jack.enable = false;
-	 };
-	 tlp = {
-		enable = true;
-		settings = {
-		  CPU_SCALING_GOVERNOR_ON_AC = "performance";
-		  CPU_SCALING_GOVERNOR_ON_BAT = "schedutil";
-
-		  CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
-		  CPU_ENERGY_PERF_POLICY_ON_BAT = "balance_power";
-
-		  CPU_MIN_PERF_ON_AC = 0;
-		  CPU_MAX_PERF_ON_AC = 100;
-		  CPU_MIN_PERF_ON_BAT = 0;
-		  CPU_MAX_PERF_ON_BAT = 100;
-
-		 START_CHARGE_THRESH_BAT0 = 84; # starts-to-charge threshold
-		 STOP_CHARGE_THRESH_BAT0 = 85; # stops-charging threshold
-		};
 	 };
   };
   systemd = {
@@ -287,32 +269,9 @@ in
   xdg = {
 	 portal = {
 		enable = true;
-		extraPortals = with pkgs; [
-		  xdg-desktop-portal-gtk
-		  xdg-desktop-portal-wlr
-		];
-		config = {
-		  sway = {
-			 # setting sway.enable by default sets this to gtk
-			 # wlr has features, gtk has compatibility
-			 # try wlr first, then fallback to gtk
-			 default = lib.mkForce [ "wlr" "gtk" ];
-			 "org.freedesktop.impl.portal.Screenshot" = ["wlr"];
-			 "org.freedesktop.impl.portal.ScreenCast" = ["wlr"];
-		  };
-		};
+		extraPortals = with pkgs; [ xdg-desktop-portal-gtk ];
+		config.common.default = [ "gtk" ];
 		xdgOpenUsePortal = true;
-		wlr = {
-		  enable = true;
-		  settings = {
-			 screencast = {
-				output_name = "eDP-1";
-				max_fps = 30;
-				chooser_type = "simple";
-				chooser_cmd = "${pkgs.slurp}/bin/slurp -f %o -or";
-			 };
-		  };
-		};
 	 };
 	 mime = {
 		enable = true;

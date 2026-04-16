@@ -10,7 +10,7 @@
     alacritty
     dmenu-rs
     i3status-rust
-    wl-clipboard
+	 xclip
     killall
     kdePackages.kdialog
     kdePackages.dolphin
@@ -60,7 +60,6 @@
     pavucontrol
 
     brightnessctl
-    wl-gammarelay-rs
 
     virt-manager
     libvirt
@@ -79,9 +78,6 @@
     btop
     powertop
     dust
-
-    grim
-    slurp
 
     gocryptfs
     ntfs3g
@@ -199,7 +195,6 @@
 
     # games
     winetricks
-    wineWowPackages.waylandFull
     lutris
     prismlauncher
     cockatrice

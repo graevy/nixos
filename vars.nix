@@ -1,7 +1,7 @@
 {
   homeManagerVersion = "25.05";
 
-  me = "a";
-  homeDir = "/home/a/";
-  hostName = "very";
+  me = "io";
+  homeDir = "/home/io/";
+  hostName = "home";
 }
