@@ -75,8 +75,7 @@
     android-tools
 
     htop
-    btop
-    powertop
+    btop-cuda
     dust
 
     gocryptfs
@@ -115,6 +114,8 @@
     yt-dlp
 	 # i get bugs with transmission sometimes
 	 qbittorrent
+
+	 feather
 
     firefox
     tor
