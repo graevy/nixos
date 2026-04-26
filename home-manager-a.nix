@@ -77,7 +77,7 @@ in
 
   services = {
     syncthing = {
-      enable = false;
+      enable = true;
       # override *WebUI* devices/folders
       overrideDevices = true;
       overrideFolders = true;
@@ -105,6 +105,7 @@ in
 
   systemd.user = {
     services = {
+	   syncthing.Install.WantedBy = lib.mkForce [ ];
       prowlarr = {
         Unit = {
           Description = "Prowlarr";
