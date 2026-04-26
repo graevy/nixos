@@ -83,18 +83,19 @@ in
       overrideFolders = true;
       settings = {
         devices = {
+		    "home" = { id = "TAJOPPQ-M4CXQQL-MCCN7D4-Q3LEBTI-MXPFKEC-EQL2I6C-YC2A2MD-2KRB7QD"; };
           "baby" = { id = "QA46X3F-UHHIGX3-4H4KG5Y-ULQBBKL-4VRDYUF-KRX26YZ-AMXCO3F-NYJSXQO"; };
           "kob" = { id = ""; };
         };
         folders = {
           "j0z43-s5odd" = {
             path = "${vars.homeDir}Music";
-            devices = [ "baby" ];
+            devices = [ "home" "baby" ];
             ignorePerms = false;  # "don't sync file perms by default"
           };
           "books-42069" = {
             path = "${vars.homeDir}Documents/books";
-            devices = [ "baby" "kob" ];
+            devices = [ "home" "baby" "kob" ];
             ignorePerms = false;
           };
         };
