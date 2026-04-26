@@ -1,12 +1,6 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, vars, ... }:
 
-let
-  vars = import ./vars.nix;
-  nixpkgs = import <nixpkgs> {};
-in
 {
-  imports = [ ./hardware-configuration.nix ./packages.nix ];
-
   boot = {
 	 loader = {
 		systemd-boot.enable = true;
@@ -23,17 +17,25 @@ in
 		# };
 		};
 
-		# defaults to 60. i really don't want to use swap unless i'm about to oom
-		kernel.sysctl."vm.swappiness" = 10;
+		kernel.sysctl = {
+
+		  "vm.swappiness" = 60; # defaults to 60
+
+		  # 2.5gb hugepages for mining
+		  "vm.nr_hugepages" = 1280;
+		};
+
+		# specifically for passive mining
+		kernelModules = [ "msr" ];
 	};
 
-  # swapDevices = [{
-	 # device = "/var/lib/swapfile";
-	 # size = 8*1024; # megs
-	 # options = [ "discard" ];
-	 # # encrypts ram contents so they don't leak to disk. appears to cause crashes?
-	 # randomEncryption.enable = true;
-  # }];
+  swapDevices = [{
+	 device = "/var/lib/swapfile";
+	 size = 8*1024; # megs
+	 options = [ "discard" ];
+	 # encrypts ram contents so they don't leak to disk. appears to cause crashes?
+	 randomEncryption.enable = true;
+  }];
 
   nix = {
 	 package = pkgs.nixVersions.stable;
@@ -47,12 +49,12 @@ in
 	 config = {
 		allowUnfree = true;
 	 };
-	 # overlays = [
+	 overlays = [
 		# # https://github.com/NixOS/nixpkgs/issues/371837
 		# (final: prev: { 
 		#  jackett = prev.jackett.overrideAttrs { doCheck = false; }; 
 		# })
-	 # ];
+	 ];
   };
 
   home-manager = {
@@ -92,6 +94,18 @@ in
 	 hostName = "${vars.hostName}";
 	 networkmanager.enable = true;
 	 firewall.enable = false;
+  };
+
+  hardware = {
+    graphics.enable = true;
+	 graphics.enable32Bit = true;
+	 bluetooth.enable = true;
+	 nvidia = { 
+      modesetting.enable = true;
+      open = false;
+      nvidiaSettings = true;
+      package = config.boot.kernelPackages.nvidiaPackages.stable;
+    };
   };
 
   environment = {
@@ -151,22 +165,12 @@ in
 
   };
 
-# temporary -- remove after bootstrap
-hardware.nvidia = {
-modesetting.enable = true;
-open = false;
-nvidiaSettings = true;
-package = config.boot.kernelPackages.nvidiaPackages.stable;
-};
-hardware.graphics.enable = true;
-hardware.bluetooth.enable = true; 
-
   services = {
     xserver = {
 	   enable = true;
       videoDrivers = [ "nvidia" ];
-		windowManager.i3.enable = true;
-		displayManager.lightdm.enable = true;
+      windowManager.i3.enable = true;
+      displayManager.startx.enable = true;
 	 };
 
 	 dbus.enable = true;		 # likely doesn't need to be explicitly enabled?
@@ -207,6 +211,24 @@ hardware.bluetooth.enable = true;
 		pulse.enable = true;
 		jack.enable = false;
 	 };
+    monero = {
+      enable = true;
+		prune = true;
+		rpc = {
+		  address = "127.0.0.1";
+		  port = 18081;
+		  user = "monero";
+		  password = "monero";
+		};
+
+      # Extra monerod flags
+      extraConfig = ''
+        db-sync-mode=safe
+        no-igd=1
+      '';
+
+      dataDir = "/var/lib/monero";
+    };
   };
   systemd = {
 	 services = {
