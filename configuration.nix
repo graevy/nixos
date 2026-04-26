@@ -166,9 +166,14 @@
 
 	 # many of these are disabled via systemd.services.<service>.wantedBy below
 	 openssh.enable = true;
-	 printing.enable = true; # CUPS
 	 ollama.enable = false;
 	 # userspace-policing oom killer daemon sitting ahead of the kernelspace's
+
+    # CUPS
+	 printing =  { 
+	   enable = true; 
+		drivers = [ pkgs.brlaser ];
+    };
 	 earlyoom = {
       enable = true; freeMemThreshold = 10; # freeSwapThreshold = 5; # percentage
     };
