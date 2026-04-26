@@ -77,25 +77,26 @@ in
 
   services = {
     syncthing = {
-      enable = false;
+      enable = true;
       # override *WebUI* devices/folders
       overrideDevices = true;
       overrideFolders = true;
       settings = {
         devices = {
 		    "home" = { id = "TAJOPPQ-M4CXQQL-MCCN7D4-Q3LEBTI-MXPFKEC-EQL2I6C-YC2A2MD-2KRB7QD"; };
+			 "very" = { id = "HN7JQZO-HY4SYNO-F5ZOIZI-5EBCBSR-BFHTOFX-RSVX5RV-LVWUCYR-RQYJRAX"; };
           "baby" = { id = "QA46X3F-UHHIGX3-4H4KG5Y-ULQBBKL-4VRDYUF-KRX26YZ-AMXCO3F-NYJSXQO"; };
           "kob" = { id = ""; };
         };
         folders = {
           "j0z43-s5odd" = {
             path = "${vars.homeDir}Music";
-            devices = [ "home" "baby" ];
+            devices = [ "home" "very" "baby" ];
             ignorePerms = false;  # "don't sync file perms by default"
           };
           "books-42069" = {
             path = "${vars.homeDir}Documents/books";
-            devices = [ "home" "baby" "kob" ];
+            devices = [ "home" "very" "baby" "kob" ];
             ignorePerms = false;
           };
         };
@@ -105,6 +106,7 @@ in
 
   systemd.user = {
     services = {
+	   syncthing.Install.WantedBy = lib.mkForce [ ];
       prowlarr = {
         Unit = {
           Description = "Prowlarr";
