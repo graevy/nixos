@@ -6,9 +6,6 @@ in
   home.stateVersion = "${vars.homeManagerVersion}";
 
   xdg = {
-    # configFile."nvim" = {
-    #   source = config.lib.file.mkOutOfStoreSymlink "${vars.homeDir}/.local/share/nvim/";
-    # };
     mimeApps = {
       enable = true;
       defaultApplications = {
@@ -66,14 +63,6 @@ in
 			name = "avery";
 			email = "avry@pm.me";
 		};
-    };
-    neovim = {
-      enable = true;
-      defaultEditor = true;
-      viAlias = true;
-      vimAlias = false;
-      withPython3 = false;
-      withRuby = false;
     };
   };
 

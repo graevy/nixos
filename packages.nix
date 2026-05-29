@@ -7,10 +7,11 @@
 
   environment.systemPackages = with pkgs; [
     vim
+    neovim
     alacritty
     dmenu-rs
     i3status-rust
-	 xclip
+    xclip
     killall
     kdePackages.kdialog
     kdePackages.dolphin
@@ -40,7 +41,7 @@
     podman
     k9s
     kubectl
-	 kubelogin-oidc
+    kubelogin-oidc
     kubernetes-helm
     fluxcd
 
