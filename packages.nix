@@ -131,6 +131,7 @@
     telegram-desktop
     signal-desktop
 
+    yazi
     # hiding this crime for now. seems like we have to use kde or dolphin as a file chooser :l
     # (pkgs.writeTextFile {
     #   name = "yazi-choose.desktop";

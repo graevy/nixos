@@ -6,9 +6,9 @@ in
   home.stateVersion = "${vars.homeManagerVersion}";
 
   xdg = {
-    configFile."nvim" = {
-      source = config.lib.file.mkOutOfStoreSymlink "${vars.homeDir}.local/share/nvim/";
-    };
+    # configFile."nvim" = {
+    #   source = config.lib.file.mkOutOfStoreSymlink "${vars.homeDir}/.local/share/nvim/";
+    # };
     mimeApps = {
       enable = true;
       defaultApplications = {
@@ -44,8 +44,8 @@ in
   # };
 
   # home.fileSystems = {
-  #   "${vars.homeDir}test" = {
-  #     device = "${vars.homeDir}test.encrypted";
+  #   "${vars.homeDir}/test" = {
+  #     device = "${vars.homeDir}/test.encrypted";
   #     fsType = "fuse.gocryptfs";
   #     options = [
   #       "rw"
@@ -64,7 +64,7 @@ in
       enable = true;
 		settings.user = {
 			name = "avery";
-			email = "avery@cute.tg";
+			email = "avry@pm.me";
 		};
     };
     neovim = {
@@ -72,6 +72,8 @@ in
       defaultEditor = true;
       viAlias = true;
       vimAlias = false;
+      withPython3 = false;
+      withRuby = false;
     };
   };
 
@@ -90,12 +92,12 @@ in
         };
         folders = {
           "j0z43-s5odd" = {
-            path = "${vars.homeDir}Music";
+            path = "${vars.homeDir}/Music";
             devices = [ "home" "very" "baby" ];
             ignorePerms = false;  # "don't sync file perms by default"
           };
           "books-42069" = {
-            path = "${vars.homeDir}Documents/books";
+            path = "${vars.homeDir}/Documents/books";
             devices = [ "home" "very" "baby" "kob" ];
             ignorePerms = false;
           };
@@ -179,10 +181,10 @@ in
       "d %h/.local/share/jackett 0755 - - -"
 		# "d %h/.local/state/nix/profiles 0755 - - -"
 
-		"d ${vars.homeDir}code 0755 ${vars.me} users"
-		"d ${vars.homeDir}writes 0700 ${vars.me} users"
-		"d ${vars.homeDir}Music 0755 ${vars.me} users"
-		"d ${vars.homeDir}Pictures 0755 ${vars.me} users"
+		"d ${vars.homeDir}/code 0755 ${vars.me} users"
+		"d ${vars.homeDir}/writes 0700 ${vars.me} users"
+		"d ${vars.homeDir}/Music 0755 ${vars.me} users"
+		"d ${vars.homeDir}/Pictures 0755 ${vars.me} users"
 
       "L %h/torrents - - - - %h/.local/share/transmission/torrents"
     ];
