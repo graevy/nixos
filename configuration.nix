@@ -64,7 +64,7 @@
 	 defaultSopsFormat = "json";
 	 
 	 # maybe wants a separate key eventually
-	 age.keyFile = "${vars.homeDir}.config/sops/age/keys.txt";
+	 age.keyFile = "${vars.homeDir}/.config/sops/age/keys.txt";
 	 
 	 secrets = {
 		# TODO
@@ -193,8 +193,9 @@
 		settings = {
 		  dns = {
 			 magic_dns = true;
-			 base_domain = "${vars.hostName}.local";
+			 base_domain = "tailnet.example";
 			 search_domains = [];
+			 nameservers.global = [ "1.1.1.1" "8.8.8.8" ];
 		  };
 		};
 	 };
@@ -267,9 +268,9 @@
 		# root inherits my configs
 		# e.g. /home/a/.bashrc must be `drw-r--r-- root root` to avoid priv-esc on root shell
 		# this works well except for ssh, nvim...things i try not to do as root anyway
-		"L /root/.bashrc - - - - ${vars.homeDir}.bashrc"
-		"L /root/.gitconfig - - - - ${vars.homeDir}.gitconfig"
-		"L /root/.local/share/nvim - - - - ${vars.homeDir}.local/share/nvim"
+		"L /root/.bashrc - - - - ${vars.homeDir}/.bashrc"
+		"L /root/.gitconfig - - - - ${vars.homeDir}/.gitconfig"
+		# "L /root/.local/share/nvim - - - - ${vars.homeDir}/.local/share/nvim"
 	 ];
   };
 
