@@ -1,19 +1,20 @@
 { config, lib, pkgs, vars, ... }:
 {
-  boot = {
-	 loader = {
-		systemd-boot.enable = true;
-		efi = {
-		  canTouchEfiVariables = true;
-		  efiSysMountPoint = "/boot";
-		};
-		# for 25.11?
-		# will eventually want to switch to https://github.com/RefindPlusRepo/RefindPlus
-		# https://github.com/NixOS/nixpkgs/pull/414394#issuecomment-2949492057
-		# refind = {
-		#	 enable = true;
-		#	 version = "stable";
-		# };
+	boot = {
+		loader = {
+			systemd-boot.enable = true;
+			efi = {
+				canTouchEfiVariables = true;
+				efiSysMountPoint = "/boot";
+			};
+			# for 25.11?
+			# will eventually want to switch to https://github.com/RefindPlusRepo/RefindPlus
+			# https://github.com/NixOS/nixpkgs/pull/414394#issuecomment-2949492057
+			# grub.enable = false;
+			# refind = {
+				# enable = true;
+				# version = "stable";
+			# };
 		};
 
 		# defaults to 60. i really don't want to use swap unless i'm about to oom
@@ -326,6 +327,18 @@
   };
 
   security.rtkit.enable = true;
+
+  hardware = {
+    graphics = {
+	   enable = true;
+	   extraPackages = with pkgs; [
+	     intel-media-driver     # VA-API decode/encode
+	     vpl-gpu-rt             # QSV hardware acceleration replacement
+	     intel-compute-runtime  # Optional OpenCL support
+	   ];
+	 };
+	 bluetooth.enable = true;
+  };
 
   # don't touch it
   system.stateVersion = "24.11"; # don't you dare

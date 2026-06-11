@@ -8,6 +8,7 @@
   environment.systemPackages = with pkgs; [
     vim
     neovim
+    tree-sitter
     alacritty
     dmenu-rs
     i3status-rust
@@ -201,7 +202,7 @@
 
     # games
     winetricks
-    wineWowPackages.waylandFull
+    wineWow64Packages.waylandFull
     lutris
     prismlauncher
     cockatrice

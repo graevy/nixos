@@ -3,6 +3,7 @@ for fresh install from nixos-minimal iso:
 - get root, [make partitions with fdisk](https://nixos.wiki/wiki/NixOS_Installation_Guide), mount root&boot, cd /mnt
 - `mkdir etc`, `cd etc`
 - `nix-shell -p git`, `git clone https://github.com/graevy/nixos`, `cd nixos`
+- `nixos-generate-config --root /mnt`
 - `nixos-install --flake .#a`
 - `exit` root
 - proceed to [dotfiles](https://github.com/graevy/dotfiles)
