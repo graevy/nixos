@@ -16,6 +16,9 @@
     killall
     kdePackages.kdialog
     kdePackages.dolphin
+
+	 gocryptfs
+	 fuse
     sops
 
     man-pages
@@ -34,8 +37,11 @@
     inetutils
     tmux
     mosh
+	 iw
+	 aircrack-ng
     wireshark
     wireguard-tools
+
     caddy
     hugo
 
@@ -45,6 +51,7 @@
 	 kubelogin-oidc
     kubernetes-helm
     fluxcd
+	 openbao
 
     git
     git-lfs
@@ -53,6 +60,7 @@
     mlocate
     nix-tree
     nix-search-cli
+	 nix-index
     nix-inspect
 
     mariadb
@@ -127,17 +135,19 @@
     torsocks
     tor-browser
     vlc
+	 mpv
     libreoffice
-	 thunderbird
+	 # thunderbird
     foliate # ebooks
-    anki # flash cards
+	 mupdf
+    # anki # flash cards
     discord
     element-desktop
     telegram-desktop
     signal-desktop
 
-    yazi
-    # hiding this crime for now. seems like we have to use kde or dolphin as a file chooser :l
+    # hiding this crime for now. seems like we have to use kde or dolphin as a file chooser :/
+    # yazi
     # (pkgs.writeTextFile {
     #   name = "yazi-choose.desktop";
     #   text =
