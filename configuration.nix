@@ -117,7 +117,7 @@
   users.users = {
 	 ${vars.me} = {
 		isNormalUser = true;
-		extraGroups = [ "wheel" "networkmanager" "torrent" "docker" "libvirtd" ]; 
+		extraGroups = [ "wheel" "networkmanager" "wireshark" "torrent" "docker" "libvirtd" ]; 
 		# packages = with pkgs; [ ];
 	 };
   };
@@ -149,6 +149,10 @@
 		enable = true;
 		nix-direnv.enable = true;
 	 };
+	 wireshark = {
+      enable = true;
+		package = pkgs.wireshark;
+	 };
 	 virt-manager.enable = true;
 	 steam = {
       enable = true;
@@ -173,7 +177,8 @@
     # CUPS
 	 printing =  { 
 	   enable = true; 
-		drivers = [ pkgs.brlaser ];
+		startWhenNeeded = true;
+		drivers = [ pkgs.gutenprint pkgs.brlaser pkgs.cnijfilter2 ];
     };
 	 earlyoom = {
       enable = true; freeMemThreshold = 10; # freeSwapThreshold = 5; # percentage
@@ -227,12 +232,15 @@
 	 };
   };
   systemd = {
+    sockets = {
+      cups.wantedBy = lib.mkForce [ ];
+	 };
 	 services = {
 		# this is the simplest nixos pattern i have found to (manually) lazy-load services.
 		# `services.printing.enabled = false` means the unit file doesn't get created; can't `systemctl start cups` without this
 		# note that the initial declaration is in services, not systemd.services;
 		# declaring custom services here would also work, but is less stable
-		printing.wantedBy = lib.mkForce [ ];
+		cups.wantedBy = lib.mkForce [ ];
 		headscale.wantedBy = lib.mkForce [ ];
 		tor.wantedBy = lib.mkForce [ ];
 		avahi.wantedBy = lib.mkForce [ ];
