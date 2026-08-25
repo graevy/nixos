@@ -170,9 +170,9 @@ in
 		# "d %h/.local/state/nix/profiles 0755 - - -"
 
 		"d ${vars.homeDir}/code 0755 ${vars.me} users"
-		"d ${vars.homeDir}/writes 0700 ${vars.me} users"
 		"d ${vars.homeDir}/Music 0755 ${vars.me} users"
 		"d ${vars.homeDir}/Pictures 0755 ${vars.me} users"
+		"d ${vars.homeDir}/crypt.cipher 0755 ${vars.me} users"
 
       "L %h/torrents - - - - %h/.local/share/transmission/torrents"
     ];
