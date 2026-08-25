@@ -4,10 +4,12 @@ for fresh install from nixos-minimal iso:
 - `mkdir etc`, `cd etc`
 - `nix-shell -p git`, `git clone https://github.com/graevy/nixos`, `cd nixos`
 - `nixos-generate-config --root /mnt`
-- `nixos-install --flake .#a`
+- `nixos-install --flake .#<user>`
 - `exit` root
+- `cd /home/<user>/crypt.cipher && gocryptfs -init`
 - proceed to [dotfiles](https://github.com/graevy/dotfiles)
 - if recovering, pull stateful sources:
     home dir (sops-nix should eventually replace this with a decryption step)
     /var/lib maybe
     /etc/NetworkManager maybe
+
