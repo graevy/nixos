@@ -17,8 +17,8 @@
     kdePackages.kdialog
     kdePackages.dolphin
 
-	 gocryptfs
-	 fuse
+    gocryptfs
+    fuse
     sops
 
     man-pages
@@ -35,10 +35,11 @@
     nmap
     openssl
     inetutils
+    arp-scan-rs
     tmux
     mosh
-	 iw
-	 aircrack-ng
+    iw
+    aircrack-ng
     wireshark
     wireguard-tools
 
@@ -48,10 +49,11 @@
     podman
     k9s
     kubectl
-	 kubelogin-oidc
+    talosctl
+    kubelogin-oidc
     kubernetes-helm
     fluxcd
-	 openbao
+    openbao
 
     git
     git-lfs
@@ -60,7 +62,7 @@
     mlocate
     nix-tree
     nix-search-cli
-	 nix-index
+    nix-index
     nix-inspect
 
     mariadb
@@ -111,9 +113,9 @@
     tree
     usbutils
     jq
-	 jwt-cli
+    jwt-cli
     yq
-	 umlet
+    umlet
 
     feh
     imagemagick
@@ -127,19 +129,19 @@
     lidarr
     radarr
     yt-dlp
-	 # i get bugs with transmission sometimes
-	 qbittorrent
+    # i get bugs with transmission sometimes
+    qbittorrent
 
     firefox
     tor
     torsocks
     tor-browser
     vlc
-	 mpv
+    mpv
     libreoffice
-	 # thunderbird
+    # thunderbird
     foliate # ebooks
-	 mupdf
+    mupdf
     # anki # flash cards
     discord
     element-desktop
@@ -207,8 +209,8 @@
     rust-analyzer
     javascript-typescript-langserver
 
-	 # ai
-	 llm
+    # ai
+    #llm
 
     # games
     winetricks
