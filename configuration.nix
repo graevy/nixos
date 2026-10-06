@@ -96,6 +96,7 @@
 		VISUAL = "nvim";
 		TERM = "alacritty";
 		XCURSOR_SIZE = 24;
+		HISTCONTROL = "ignorespace";
 		# desktop portals
 		GTK_USE_PORTAL = 1;
 		GTK_THEME="Dracula";
