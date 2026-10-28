@@ -106,6 +106,7 @@
     viu
     tectonic # latex rendering
     mermaid-cli # mermaid diagrams
+    flameshot
 
     transmission_4
     prowlarr
@@ -124,7 +125,8 @@
     tor-browser
     vlc
     libreoffice
-	 thunderbird
+    plezy
+    thunderbird
     foliate # ebooks
     anki # flash cards
     discord
@@ -193,14 +195,15 @@
     rust-analyzer
     javascript-typescript-langserver
 
-	 # ai
-	 llm
+    # ai
+    llm
 
     # games
     winetricks
     lutris
     prismlauncher
     cockatrice
+    r2modman
   ];
 
   # nix documentation is so bad
