@@ -133,6 +133,8 @@
     qbittorrent
 
     firefox
+    # for when we love webdev
+    chromium
     tor
     torsocks
     tor-browser
@@ -144,6 +146,7 @@
     mupdf
     # anki # flash cards
     discord
+    slack
     element-desktop
     telegram-desktop
     signal-desktop
