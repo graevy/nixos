@@ -4,7 +4,8 @@ for fresh install from nixos-minimal iso:
 - `mkdir etc`, `cd etc`
 - `nix-shell -p git`, `git clone https://github.com/graevy/nixos`, `cd nixos`
 - `nixos-generate-config --root /mnt`
-- `nixos-install --flake .#<user>`
+- `nixos-install --flake .#<HOSTNAME>` not user, hostname
+- sometimes have to override `.gitignore` for `hardware-configuration.nix` visibility
 - `exit` root
 - `cd /home/<user>/crypt.cipher && gocryptfs -init`
 - proceed to [dotfiles](https://github.com/graevy/dotfiles)

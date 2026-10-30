@@ -5,4 +5,7 @@
   me = "a";
   homeDir = "/home/a";
   hostName = "very";
+  gitName = "avery";
+  gitEmail = "avry@pm.me";
 }
+

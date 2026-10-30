@@ -60,8 +60,8 @@ in
     git = {
       enable = true;
 		settings.user = {
-			name = "avery";
-			email = "avry@pm.me";
+			name = "${vars.gitName}";
+			email = "${vars.gitEmail}";
 		};
     };
   };
