@@ -175,6 +175,7 @@ in
 		"d ${vars.homeDir}/crypt.cipher 0755 ${vars.me} users"
 
       "L %h/torrents - - - - %h/.local/share/transmission/torrents"
+      "L %h/lutris - - - - %h/.local/share/lutris/games"
     ];
   };
 }
