@@ -176,6 +176,10 @@ in
 
       "L %h/torrents - - - - %h/.local/share/transmission/torrents"
       "L %h/lutris - - - - %h/.local/share/lutris/games"
+
+      "L %h/.ssh - - - - %h/crypt/ssh"
+      "L %h/.kube - - - - %h/crypt/kube"
+      "L %h/.talos - - - - %h/crypt/talos"
     ];
   };
 }
