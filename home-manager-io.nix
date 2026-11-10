@@ -82,6 +82,10 @@ in
 			email = "${vars.gitEmail}";
 		};
     };
+    keepassxc = {
+      enable = true;
+      browserIntegration.firefox = true;
+    };
   };
 
   services = {
